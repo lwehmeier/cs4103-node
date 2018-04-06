@@ -1,0 +1,20 @@
+digraph {
+graph [name="graphname"]
+a[label="pc5-001-l"];
+b[label="pc5-002-l"];
+c[label="pc5-003-l"];
+d[label="pc5-004-l"];
+e[label="pc5-005-l"];
+f[label="pc5-006-l"];
+g[label="pc5-007-l"];
+h[label="pc5-008-l"];
+i[label="pc5-009-l"];
+j[label="pc2-104-l"];
+a->b
+a->c
+c->a;
+d->a;
+e->a;
+f->a;
+i->a;
+}
