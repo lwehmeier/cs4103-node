@@ -4,211 +4,152 @@
 
 #ifndef CS4103_CONNECTIONMANAGER_H
 #define CS4103_CONNECTIONMANAGER_H
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/array.hpp>
+#include <boost/bind.hpp>
+#include <thread>
+#include <iostream>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/read_until.hpp>
-#include <boost/asio/streambuf.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/bind.hpp>
-#include <iostream>
-#include <algorithm>
-#include <cstdlib>
-#include <deque>
-#include <iostream>
-#include <set>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
-#include <boost/asio/read_until.hpp>
-#include <boost/asio/streambuf.hpp>
-#include <boost/asio/write.hpp>
+#include <cstdlib>
+#include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
+#include <deque>
+#include "networkMessage.h"
 
-using boost::asio::ip::tcp;
-using boost::asio::deadline_timer;
-class client
-{
+#define HEARTBEAT_INTERVAL 10
+#define HEARTBEAT_TIMEOUT (2*HEARTBEAT_INTERVAL)
+
+class Sender{
+    std::deque<std::shared_ptr<networkMessage>> queue;
+    boost::asio::io_service* io_service;
+    boost::asio::ip::udp::socket socket{*io_service};
+    boost::asio::ip::udp::endpoint remote_endpoint;
+    boost::asio::deadline_timer queue_notification;
+    std::string remoteName;
 public:
-    client(boost::asio::io_service& io_service)
-            : stopped_(false),
-              socket_(io_service),
-              deadline_(io_service),
-              heartbeat_timer_(io_service)
+    Sender(boost::asio::io_service* ios, std::string target_ip, int target_port) : io_service(ios), queue_notification(*ios), remoteName(target_ip)
     {
+        boost::asio::ip::udp::resolver resolver(*io_service);
+        boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), target_ip, std::to_string(target_port));
+        boost::asio::ip::udp::resolver::iterator iter = resolver.resolve(query);
+        remote_endpoint = *iter;
+        // The non_empty_output_queue_ deadline_timer is set to pos_infin whenever
+        // the output queue is empty. This ensures that the output actor stays
+        // asleep until a message is put into the queue.
+        queue_notification.expires_at(boost::posix_time::pos_infin);
+        queue_notification.async_wait(boost::bind(&Sender::queueEvent, this));
+        socket.open(boost::asio::ip::udp::v4());
     }
+    ~Sender(){
+        if(socket.is_open()) {
+            socket.cancel();
+        }
+        queue_notification.cancel();
+    }
+    void send();
+    void queueEvent();
+    void put(std::shared_ptr<networkMessage> msg);
+};
 
-    // Called by the user of the client class to initiate the connection process.
-    // The endpoint iterator will have been obtained using a tcp::resolver.
-    void start(tcp::resolver::iterator endpoint_iter);
-
-    // This function terminates all the actors to shut down the connection. It
-    // may be called by the user of the client class, or by the class itself in
-    // response to graceful termination or an unrecoverable error.
-    void stop();
-
-private:
-    void start_connect(tcp::resolver::iterator endpoint_iter);
-
-    void handle_connect(const boost::system::error_code& ec,
-                        tcp::resolver::iterator endpoint_iter);
-
-    void start_read();
-
-    void handle_read(const boost::system::error_code& ec);
-
-    void start_write();
-
-    void handle_write(const boost::system::error_code& ec);
-
+class Client {
+    std::deque<std::shared_ptr<networkMessage>> queue;
+    boost::asio::io_service* io_service;
+    boost::asio::ip::udp::socket *socket;
+    boost::array<char, MSG_SZ> recv_buffer;
+    boost::asio::ip::udp::endpoint remote_endpoint;
+    boost::asio::deadline_timer deadline_;
+    boost::asio::deadline_timer queue_notification;
+    std::string remoteName;
+    bool alive = true;
     void check_deadline();
-
-private:
-    bool stopped_;
-    tcp::socket socket_;
-    boost::asio::streambuf input_buffer_;
-    deadline_timer deadline_;
-    deadline_timer heartbeat_timer_;
-};
-
-
-
-
-//----------------------------------------------------------------------
-
-class subscriber
-{
 public:
-    virtual ~subscriber() {}
-    virtual void deliver(const std::string& msg) = 0;
+    Client(boost::asio::io_service* ios, std::string remote_ip,
+           int remote_port, boost::asio::ip::udp::socket* rx_sock):deadline_(*ios),io_service(ios),
+           queue_notification(*ios), socket(rx_sock), remoteName(remote_ip) {
+        deadline_.expires_at(boost::posix_time::pos_infin);
+        check_deadline();//init callbacks
+        //socket.open(boost::asio::ip::udp::v4());
+        boost::asio::ip::udp::resolver resolver(*io_service);
+        boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), remote_ip, std::to_string(remote_port));
+        boost::asio::ip::udp::resolver::iterator iter = resolver.resolve(query);
+        remote_endpoint=*iter;
+        //socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), remote_port));
+        // The non_empty_output_queue_ deadline_timer is set to pos_infin whenever
+        // the output queue is empty. This ensures that the output actor stays
+        // asleep until a message is put into the queue.
+        queue_notification.expires_at(boost::posix_time::pos_infin);
+        queue_notification.async_wait(boost::bind(&Client::queueEvent, this));
+    }
+    ~Client(){
+        boost::system::error_code ignored_ec;
+        //if(socket.is_open()) {
+        //    socket.cancel(ignored_ec);
+        //}
+        queue_notification.cancel();
+        deadline_.cancel();
+    }
+    int queuedMessages(){
+        return queue.size();
+    }
+    std::shared_ptr<networkMessage> getMessage(){
+        auto msg = queue.front();
+        queue.pop_front();
+        return msg;
+    }
+    bool isAlive(){
+        return alive;
+    }
+    void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
+    void wait();
+    void Receiver();
+    void queueEvent();
 };
 
-typedef boost::shared_ptr<subscriber> subscriber_ptr;
 
-//----------------------------------------------------------------------
 
-class channel
-{
+
+class RemoteConnection{
+    Sender sender;
+    Client client;
+    static boost::asio::io_service* io_service;
+    static boost::asio::ip::udp::socket *rx_socket;
+    boost::asio::deadline_timer nextHeartbeat;
+    bool alive = false;
+    std::string remoteName;
 public:
-    void join(subscriber_ptr subscriber);
-    void leave(subscriber_ptr subscriber);
-    void deliver(const std::string& msg);
-private:
-    std::set<subscriber_ptr> subscribers_;
+    RemoteConnection(boost::asio::io_service* ios, std::string ip, int port):sender(ios, ip, port),
+                     client(ios, ip, port, rx_socket), nextHeartbeat(*ios), remoteName(ip) {
+        client.Receiver();
+        enableHeartbeat();
+    }
+    void sendMessage(std::shared_ptr<networkMessage> msg){
+        resetHeartbeat();
+        sender.put(msg);
+    }
+    std::shared_ptr<networkMessage> getMessage(){
+        return client.getMessage();
+    }
+    int queuedRxMessages(){
+        return client.queuedMessages();
+    }
+    static void setup(boost::asio::io_service* ios, int rxPort){
+        io_service = ios;
+        if(!rx_socket) {
+            rx_socket= new boost::asio::ip::udp::socket(*ios);
+            rx_socket->open(boost::asio::ip::udp::v4());
+            rx_socket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), rxPort));
+        }
+    }
+    bool isAlive(){
+        return client.isAlive();
+    }
+    void enableHeartbeat();
+    void doHeartbeat();
+    void resetHeartbeat();
 };
 
-//----------------------------------------------------------------------
-
-//
-// This class manages socket timeouts by applying the concept of a deadline.
-// Some asynchronous operations are given deadlines by which they must complete.
-// Deadlines are enforced by two "actors" that persist for the lifetime of the
-// session object, one for input and one for output:
-//
-//  +----------------+                     +----------------+
-//  |                |                     |                |
-//  | check_deadline |<---+                | check_deadline |<---+
-//  |                |    | async_wait()   |                |    | async_wait()
-//  +----------------+    |  on input      +----------------+    |  on output
-//              |         |  deadline                  |         |  deadline
-//              +---------+                            +---------+
-//
-// If either deadline actor determines that the corresponding deadline has
-// expired, the socket is closed and any outstanding operations are cancelled.
-//
-// The input actor reads messages from the socket, where messages are delimited
-// by the newline character:
-//
-//  +------------+
-//  |            |
-//  | start_read |<---+
-//  |            |    |
-//  +------------+    |
-//          |         |
-//  async_- |    +-------------+
-//   read_- |    |             |
-//  until() +--->| handle_read |
-//               |             |
-//               +-------------+
-//
-// The deadline for receiving a complete message is 30 seconds. If a non-empty
-// message is received, it is delivered to all subscribers. If a heartbeat (a
-// message that consists of a single newline character) is received, a heartbeat
-// is enqueued for the client, provided there are no other messages waiting to
-// be sent.
-//
-// The output actor is responsible for sending messages to the client:
-//
-//  +--------------+
-//  |              |<---------------------+
-//  | await_output |                      |
-//  |              |<---+                 |
-//  +--------------+    |                 |
-//      |      |        | async_wait()    |
-//      |      +--------+                 |
-//      V                                 |
-//  +-------------+               +--------------+
-//  |             | async_write() |              |
-//  | start_write |-------------->| handle_write |
-//  |             |               |              |
-//  +-------------+               +--------------+
-//
-// The output actor first waits for an output message to be enqueued. It does
-// this by using a deadline_timer as an asynchronous condition variable. The
-// deadline_timer will be signalled whenever the output queue is non-empty.
-//
-// Once a message is available, it is sent to the client. The deadline for
-// sending a complete message is 30 seconds. After the message is successfully
-// sent, the output actor again waits for the output queue to become non-empty.
-//
-class tcp_session
-        : public subscriber,
-          public boost::enable_shared_from_this<tcp_session>
-{
-public:
-    tcp_session(boost::asio::io_service& io_service, channel& ch);
-    tcp::socket& socket();
-    // Called by the server object to initiate the four actors.
-    void start();
-private:
-    void stop();
-    bool stopped() const;
-    void deliver(const std::string& msg);
-    void start_read();
-    void handle_read(const boost::system::error_code& ec);
-    void await_output();
-    void start_write();
-    void handle_write(const boost::system::error_code& ec);
-    void check_deadline(deadline_timer* deadline);
-    channel& channel_;
-    tcp::socket socket_;
-    boost::asio::streambuf input_buffer_;
-    deadline_timer input_deadline_;
-    std::deque<std::string> output_queue_;
-    deadline_timer non_empty_output_queue_;
-    deadline_timer output_deadline_;
-};
-
-typedef boost::shared_ptr<tcp_session> tcp_session_ptr;
-
-
-//----------------------------------------------------------------------
-
-class server
-{
-public:
-    server(boost::asio::io_service& io_service,
-           const tcp::endpoint& listen_endpoint);
-    void start_accept();
-    void handle_accept(tcp_session_ptr session,
-                       const boost::system::error_code& ec);
-private:
-    boost::asio::io_service& io_service_;
-    tcp::acceptor acceptor_;
-    channel channel_;
-};
 #endif //CS4103_CONNECTIONMANAGER_H

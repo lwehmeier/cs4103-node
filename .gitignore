@@ -1,2 +1,5 @@
 cmake-build-debug/
 .idea/
+generatedNetwork.dot
+psshFile
+*.sh

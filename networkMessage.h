@@ -4,9 +4,14 @@
 
 #ifndef CS4103_NETWORKMESSAGE_H
 #define CS4103_NETWORKMESSAGE_H
+
+#define MSG_SZ 1036
+#include <memory>
 struct networkMessage{
-    int type;
-    int payload;
+    int type=0;
+    int sequence;
+    int payload=0;
     char data[1024];
+    static std::shared_ptr<networkMessage> mk_shared_copy(const networkMessage* msg);
 };
 #endif //CS4103_NETWORKMESSAGE_H
