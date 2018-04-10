@@ -43,9 +43,9 @@ void Client::handle_receive(const boost::system::error_code& error, size_t bytes
         //std::cout<<"parsed message"<<std::endl;
         auto msgPtr = networkMessage::mk_shared_copy(msg);
         if(msgPtr->type==0){
-            std::cout<<"Received heartbeat from "<<remoteName << std::endl;
+            //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
         }else {
-            std::cout<<"Received message from "<<remoteName << std::endl;
+            //std::cout<<"Received message from "<<remoteName << std::endl;
             queue.push_back(msgPtr);
         }
         alive = true;
@@ -100,7 +100,7 @@ void RemoteConnection::enableHeartbeat() {
 void RemoteConnection::doHeartbeat() {
     if (nextHeartbeat.expires_at() <= deadline_timer::traits_type::now()){
         resetHeartbeat();
-        std::cout<<"Sending heartbeat to "<<remoteName<<std::endl;
+        //std::cout<<"Sending heartbeat to "<<remoteName<<std::endl;
         sendMessage(std::make_shared<networkMessage>());
     }
     nextHeartbeat.async_wait(boost::bind(&RemoteConnection::doHeartbeat, this));

@@ -52,7 +52,7 @@ void readGraph(){
             gname(get_property(networkGraph,graph_name));
     dp.property("name",gname);
 
-    std::ifstream dot(std::string("../generatedNetwork.dot"));//"/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
+    std::ifstream dot(std::string("/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
     bool status = read_graphviz(dot,networkGraph,dp,"node_id");
 
     long i = *(networkGraph.vertex_set().begin());

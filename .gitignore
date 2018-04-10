@@ -3,3 +3,4 @@ cmake-build-debug/
 generatedNetwork.dot
 psshFile
 *.sh
+*.png

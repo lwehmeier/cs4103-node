@@ -5,7 +5,7 @@ def mkDot(hosts):
     nameIdMap = {}
     id = chr(65) # 'A'
     for h in hosts:
-        dot += str(id) + '[label="'+h+'"];\n'
+        dot += str(id) + '[label="'+h+':12345"];\n'
         nameIdMap[h]=id
         id=chr(ord(id)+1)
     for h in hosts:
@@ -21,11 +21,11 @@ def mkPssh(hosts):
     return pssh
 def genBuildCmd():
     cmd = "pssh -t 240 -h psshFile " # allow up to 4 min for build
-    cmd += '"mkdir -p /cs/scratch/lw96/cmake-build-debug && cd /cs/scratch/lw96/cmake-build-debug && cmake ~/CLionProjects/cs4103 && make -j6 -l4"'
+    cmd += '"mkdir -p /cs/scratch/$(whoami)/cmake-build-debug && cd /cs/scratch/$(whoami)/cmake-build-debug && cmake ~/CLionProjects/cs4103 && make -j6 -l4"'
     return cmd
 def genRunCmd():
     cmd = "pssh -t 180 -P -h psshFile " #run for 3 min, display live program output
-    cmd += '"cd /cs/scratch/lw96/cmake-build-debug && ./cs4103"'
+    cmd += '"killall cs4103; cd /cs/scratch/$(whoami)/cmake-build-debug && ./cs4103"'
     return cmd
 if __name__=='__main__':
     if len(sys.argv) < 2:

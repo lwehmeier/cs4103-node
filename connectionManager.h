@@ -20,8 +20,8 @@
 #include <deque>
 #include "networkMessage.h"
 
-#define HEARTBEAT_INTERVAL 10
-#define HEARTBEAT_TIMEOUT (2*HEARTBEAT_INTERVAL)
+#define HEARTBEAT_INTERVAL 2ul
+#define HEARTBEAT_TIMEOUT (2.5*HEARTBEAT_INTERVAL)
 
 class Sender{
     std::deque<std::shared_ptr<networkMessage>> queue;
