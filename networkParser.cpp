@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <algorithm>
 #include <set>
+
 using namespace boost;
 using namespace std;
 
@@ -51,7 +52,7 @@ void readGraph(){
             gname(get_property(networkGraph,graph_name));
     dp.property("name",gname);
 
-    std::ifstream dot(std::string("/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
+    std::ifstream dot(std::string("../generatedNetwork.dot"));//"/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
     bool status = read_graphviz(dot,networkGraph,dp,"node_id");
 
     long i = *(networkGraph.vertex_set().begin());
@@ -64,12 +65,26 @@ string getIdentity(){
     gethostname(hostname, HOST_NAME_MAX);
     return string(hostname).substr(0, strcspn(hostname, "."));
 }
-
-set<string> getNeighbourHosts(){
-    set<string> hosts;
+std::pair<std::string, int> getHost(){
     int ourVertex;
     for(int i = 0; i < networkGraph.m_vertices.size(); i++){
-        if(networkGraph.m_vertices[i].m_property.label == getIdentity()){
+        string label = networkGraph.m_vertices[i].m_property.label;
+        if(label.substr(0, strcspn(label.data(), ":")) == getIdentity()){
+            ourVertex = i;
+        }
+    }
+    string host = networkGraph.m_vertices[ourVertex].m_property.label;
+    string addr = host.substr(0, strcspn(host.data(), ":"));
+    int port = atoi(host.substr(strcspn(host.data(), ":")+1).data());
+    pair<string, int> hnode(addr, port);
+    return hnode;
+}
+set<pair<string, int>> getNeighbourHosts(){
+    set<pair<string,int>> hosts;
+    int ourVertex;
+    for(int i = 0; i < networkGraph.m_vertices.size(); i++){
+        string label = networkGraph.m_vertices[i].m_property.label;
+        if(label.substr(0, strcspn(label.data(), ":")) == getIdentity()){
             ourVertex = i;
         }
     }
@@ -80,7 +95,11 @@ set<string> getNeighbourHosts(){
         auto source = boost::source ( *ei, networkGraph );
         auto target = boost::target ( *ei, networkGraph );
         std::cout << "There is an edge from " << source <<  " to " << target << std::endl;
-        hosts.insert(networkGraph.m_vertices[target].m_property.label);
+        string label = networkGraph.m_vertices[target].m_property.label;
+        string addr = label.substr(0, strcspn(label.data(), ":"));
+        int port = atoi(label.substr(strcspn(label.data(), ":")+1).data());
+        pair<string, int> node(addr, port);
+        hosts.insert(node);
     }
     return hosts;
 }

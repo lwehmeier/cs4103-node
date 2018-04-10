@@ -14,6 +14,15 @@
 #include <unistd.h>
 #include "logging.h"
 
+struct pairhash {
+public:
+    template <typename T, typename U>
+    std::size_t operator()(const std::pair<T, U> &x) const
+    {
+        return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
+    }
+};
+
 void handler(int sig) {
     void *array[10];
     size_t size;
@@ -30,8 +39,8 @@ void handler(int sig) {
 using namespace boost;
 using namespace std;
 
-std::set<string> hosts;
-std::unordered_map<string, std::shared_ptr<RemoteConnection>> connections;
+std::set<std::pair<std::string, int>> hosts;
+std::unordered_map<std::pair<string, int>, std::shared_ptr<RemoteConnection>, pairhash> connections;
 
 int main(int argc, char* argv[])
 {
@@ -45,27 +54,27 @@ int main(int argc, char* argv[])
     readGraph();
     hosts = getNeighbourHosts();
     cout<<"adjacent hosts:"<<endl;
-    for(string s : hosts){
-        cout<<"\t"<<s<<endl;
+    for(std::pair<string, int> host : hosts){
+        cout<<"\t"<<host.first << ":" << host.second<<endl;
     }
     boost::asio::io_service ios;
-    RemoteConnection::setup(&ios, 12345);
+    RemoteConnection::setup(&ios, getHost().second);
 
-    for(string s : hosts) {
-        BOOST_LOG_SEV(lg, normal) << "Starting connection to adjacent node: " << s;
-        cout<<"connecting to host: "<<s<<endl;
-        connections[s] = std::make_shared<RemoteConnection>(&ios, s, 12345);
+    for(std::pair<string, int> host : hosts) {
+        BOOST_LOG_SEV(lg, normal) << "Starting connection to adjacent node: " << host.first <<":"<<host.second;
+        cout<<"connecting to host: "<<host.first<<":"<<host.second<<endl;
+        connections[host] = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
     }
 
     std::thread r([&] { ios.run(); });
 
     for (int i = 0; i < 40; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        for(string s : hosts) {
-            if(connections[s]->isAlive()) {
+        for(std::pair<string, int> host: hosts) {
+            if(connections[host]->isAlive()) {
                 auto msg = std::make_shared<networkMessage>();
                 msg->type=0x42;
-                connections[s]->sendMessage(msg);
+                connections[host]->sendMessage(msg);
             }
         }
         //std::cout<<"received messages in queue: "<<connections["localhost"]->queuedRxMessages()<<endl;
