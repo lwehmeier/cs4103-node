@@ -19,10 +19,14 @@
 #include <iostream>
 #include <deque>
 #include <set>
+#include <functional>
 #include "networkMessage.h"
 
 #define HEARTBEAT_INTERVAL 2ul
 #define HEARTBEAT_TIMEOUT (2.5*HEARTBEAT_INTERVAL)
+
+typedef std::function<void(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote)> callback_t;
+typedef std::function<void(const std::pair<std::string, int>& remote)> timeout_callback_t;
 
 class Sender{
     std::deque<std::shared_ptr<networkMessage>> queue;
@@ -65,12 +69,15 @@ class Client {
     boost::asio::deadline_timer deadline_;
     boost::asio::deadline_timer queue_notification;
     std::string remoteName;
+    std::pair<std::string, int> remoteHost;
+    std::unordered_map<int, callback_t> callbacks;
+    timeout_callback_t timeout_cb;
     bool alive = true;
     void check_deadline();
 public:
     Client(boost::asio::io_service* ios, std::string remote_ip,
            int remote_port, boost::asio::ip::udp::socket* rx_sock):deadline_(*ios),io_service(ios),
-           queue_notification(*ios), socket(rx_sock), remoteName(remote_ip) {
+           queue_notification(*ios), socket(rx_sock), remoteName(remote_ip), remoteHost(remote_ip, remote_port) {
         deadline_.expires_at(boost::posix_time::pos_infin);
         check_deadline();//init callbacks
         //socket.open(boost::asio::ip::udp::v4());
@@ -103,6 +110,12 @@ public:
     }
     bool isAlive(){
         return alive;
+    }
+    void registerCallback(callback_t cb, MessageType_t msgType){
+        callbacks[static_cast<int>(msgType)] = cb;
+    }
+    void registerTimeoutCallback(timeout_callback_t cb) {
+        timeout_cb = cb;
     }
     void handle_receive(std::shared_ptr<networkMessage> msg);
     void wait();
@@ -163,6 +176,12 @@ public:
     }
     bool isAlive(){
         return client->isAlive();
+    }
+    void registerCallback(callback_t cb, MessageType_t msgType) {
+        client->registerCallback(cb, msgType);
+    }
+    void registerTimeoutCallback(timeout_callback_t cb) {
+        client->registerTimeoutCallback(cb);
     }
     void enableHeartbeat();
     void doHeartbeat();

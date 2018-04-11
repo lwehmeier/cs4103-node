@@ -33,11 +33,16 @@ void Client::queueEvent() {
     queue_notification.async_wait(boost::bind(&Client::queueEvent, this));
 }
 void Client::handle_receive(std::shared_ptr<networkMessage> msg) {
-    if(msg->type==0){
-        //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
-    }else {
-        //std::cout<<"Received message from "<<remoteName << std::endl;
-        queue.push_back(msg);
+    if(callbacks.find(msg->type) != callbacks.end()){
+        callbacks[msg->type](msg, remoteHost);
+    }
+    else {
+        if (msg->type == 0) {
+            //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
+        } else {
+            //std::cout<<"Received message from "<<remoteName << std::endl;
+            queue.push_back(msg);
+        }
     }
     alive = true;
     wait();
@@ -63,6 +68,7 @@ void Client::check_deadline()
         src::severity_logger< severity_levels > lg(keywords::severity = normal);
         BOOST_LOG_SEV(lg, warning) << "Connection to node timed out: " << remoteName;
         alive = false;
+        timeout_cb(remoteHost);
         // The deadline has passed. The outstanding asynchronous operation needs
         // to be cancelled so that the blocked receive() function will return.
         //

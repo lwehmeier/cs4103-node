@@ -45,11 +45,13 @@ using namespace std;
 std::set<std::pair<std::string, int>> hosts;
 std::unordered_map<std::pair<string, int>, std::shared_ptr<RemoteConnection>, pairhash> connections;
 
-
 const std::pair<string, int> *election_q = nullptr;
 const std::pair<string, int> *election_leader = nullptr;
 bool election_init = false;
+bool electionActive = false;
+bool isLeader = false;
 std::unordered_map<std::pair<string, int>, std::pair<bool, std::string>, pairhash> election_acks;
+
 bool node_equals(const std::pair<string, int>& a, const std::pair<string, int>& b){
     return a.first == b.first && a.second == b.second;
 }
@@ -84,6 +86,7 @@ int getUptime(){
     return uptime_seconds;
 }
 void startElection(){
+    electionActive = true;
     election_q = nullptr;
     election_leader = nullptr;
     election_init = false;
@@ -102,6 +105,13 @@ void startElection(){
 }
 void handleElection(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& parent){
     //printMsgOrigin(rxMessage);
+    if(!electionActive){
+        election_q = nullptr;
+        election_leader = nullptr;
+        election_init = false;
+        election_acks.clear();
+    }
+    electionActive = true;
     if(!election_q && !election_init){
         cout<<"received election message. Setting parent to "<<parent.first<<":"<<parent.second<<endl;
         election_q = &parent;
@@ -130,6 +140,10 @@ void handleElection(std::shared_ptr<networkMessage> rxMessage, const std::pair<s
     }
 }
 void handleAck(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
+    if(!electionActive){
+        cout<<"received unexpected election ack from "<<remote.first<<":"<<remote.second<<endl;
+        return;
+    }
     //printMsgOrigin(rxMessage);
     cout<<"received ack message. from "<<remote.first<<":"<<remote.second<<endl;
     election_acks[remote]=std::pair<bool, std::string>(true, std::string(rxMessage->data));
@@ -159,7 +173,14 @@ void handleAck(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::s
             port = port.substr(0, strcspn(port.data(), ":"));
             int parsedPort = atoi(port.data());
             election_leader = new std::pair<string, int>(addr.data(), parsedPort);
+            electionActive = false;
             std::cout<<"broadcasting new leader"<<election_leader->first<<":"<<election_leader->second<<std::endl;
+            if(node_equals(*election_leader, getHost())){
+                isLeader = true;
+                std::cout<<"I am the new leader"<<std::endl;
+            } else {
+                isLeader = false;
+            }
             for(std::pair<string, int> host: hosts) {
                 if(connections[host]->isAlive()) {
                     connections[host]->sendMessage(msg);
@@ -170,10 +191,7 @@ void handleAck(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::s
 }
 void handleCoord(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
 
-    election_q = nullptr;
-    election_init = false;
-    election_acks.clear();
-
+    electionActive = false;
 
     std::string leader = std::string(rxMessage->data);
     string addr = leader.substr(0, strcspn(leader.data(), ":"));
@@ -188,14 +206,24 @@ void handleCoord(std::shared_ptr<networkMessage> rxMessage, const std::pair<std:
         return;
     }
     election_leader = ldr;
+    std::cout<<getHost().first<<getHost().second<<" == " << election_leader->first << election_leader -> second << node_equals(*election_leader, getHost()) << endl;
+    if(node_equals(*election_leader, getHost())){
+        isLeader = true;
+        std::cout<<"I am the new leader"<<std::endl;
+    } else {
+        isLeader = false;
+    }
     std::cout<<"broadcasting new leader"<<ldr->first<<":"<<ldr->second<<std::endl;
     for(std::pair<string, int> host: hosts) {
-        auto msg = std::make_shared<networkMessage>();
-        msg->type= static_cast<int>(MessageType_t::COORDINATOR);
-        sprintf(msg->data, "%s:%d", addr.data(), parsedPort);
         if(!node_equals(host,remote) && connections[host]->isAlive()) {
-            connections[host]->sendMessage(msg);
+            connections[host]->sendMessage(rxMessage);
         }
+    }
+}
+
+void handleTimeout(const std::pair<std::string, int>& remote) {
+    if(election_leader && !electionActive && node_equals(remote, *election_leader)) {
+        startElection();
     }
 }
 int main(int argc, char* argv[])
@@ -203,7 +231,7 @@ int main(int argc, char* argv[])
     init_builtin_syslog();
     src::severity_logger< severity_levels > lg(keywords::severity = normal);
     BOOST_LOG_SEV(lg, normal) << "Application started";
-    //signal(SIGSEGV, handler);   // install our handler
+    signal(SIGSEGV, handler);   // install our handler
     //signal(SIGABRT, handler);   // install our handler
     readGraph();
     hosts = getNeighbourHosts();
@@ -217,29 +245,32 @@ int main(int argc, char* argv[])
     for(std::pair<string, int> host : hosts) {
         BOOST_LOG_SEV(lg, normal) << "Starting connection to adjacent node: " << host.first <<":"<<host.second;
         cout<<"connecting to host: "<<host.first<<":"<<host.second<<endl;
-        connections[host] = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
+        auto con = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
+        con->registerCallback(handleElection, MessageType_t::ELECTION);
+        con->registerCallback(handleAck, MessageType_t::ACK);
+        con->registerCallback(handleCoord, MessageType_t::COORDINATOR);
+        con->registerTimeoutCallback(handleTimeout);
+        connections[host] = con;
     }
 
     std::thread r([&] { ios.run(); });
 
-    /*for (int i = 0; i < 40; ++i) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        for(std::pair<string, int> host: hosts) {
-            if(connections[host]->isAlive()) {
-                auto msg = std::make_shared<networkMessage>();
-                msg->type= static_cast<int>(MessageType_t::TEXT);
-                connections[host]->sendMessage(msg);
-            }
-        }
-    }
-    */
 
+    usleep(1000000ul * HEARTBEAT_TIMEOUT);
+    if(!election_leader){ //join network; if no leader broadcast was received in the last 2*TIMEOUT interval start election
+        startElection();
+        usleep(1000000ul);
+    }
+    cout<<"has leader: "<<(bool)election_leader<<endl;
     if(argc == 2){
-        usleep(1000000ul * HEARTBEAT_TIMEOUT *2);
         startElection();
     }
-
+/*
     while(1){
+        if(!isLeader && !electionActive && (election_leader && !connections[*election_leader]->isAlive() || !election_leader)){ //let's catch some pointers
+            cout<<"new election"<<endl;
+            startElection();
+        }
         for(const std::pair<string, int>& host: hosts) {
             if(connections[host]->isAlive() && connections[host]->queuedRxMessages()) {
                 auto msg = connections[host]->getMessage();
@@ -250,7 +281,7 @@ int main(int argc, char* argv[])
                     case static_cast<int>(MessageType_t::TEXT) :
                         cout<<"received text message from node"<<host.first<<":"<<host.second<<endl;
                         break;
-                    case static_cast<int>(MessageType_t::ELECTION) :
+                   case static_cast<int>(MessageType_t::ELECTION) :
                         //cout<<"received election message from node"<<host.first<<":"<<host.second<<endl;
                         handleElection(msg, host);
                         break;
@@ -268,7 +299,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
-    }
+    }*/
 
     r.join();
     return 0;
