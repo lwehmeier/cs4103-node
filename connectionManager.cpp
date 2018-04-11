@@ -32,33 +32,20 @@ void Sender::send() {
 void Client::queueEvent() {
     queue_notification.async_wait(boost::bind(&Client::queueEvent, this));
 }
-void Client::handle_receive(const boost::system::error_code& error, size_t bytes_transferred) {
-    if (error) {
-        std::cout << "Receive failed: " << error.message() << "\n";
-        return;
+void Client::handle_receive(std::shared_ptr<networkMessage> msg) {
+    if(msg->type==0){
+        //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
+    }else {
+        //std::cout<<"Received message from "<<remoteName << std::endl;
+        queue.push_back(msg);
     }
-    //std::cout << "Received: '" << "$data" << "' (" << error.message() << ")\n";
-    if(bytes_transferred==MSG_SZ){
-        const networkMessage* msg = (const networkMessage*)(recv_buffer.data());
-        //std::cout<<"parsed message"<<std::endl;
-        auto msgPtr = networkMessage::mk_shared_copy(msg);
-        if(msgPtr->type==0){
-            //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
-        }else {
-            //std::cout<<"Received message from "<<remoteName << std::endl;
-            queue.push_back(msgPtr);
-        }
-        alive = true;
-    }
+    alive = true;
     wait();
 }
 
     void Client::wait() {
         // Set a deadline for the asynchronous operation.
         deadline_.expires_from_now(boost::posix_time::seconds(HEARTBEAT_TIMEOUT));
-        socket->async_receive_from(boost::asio::buffer(recv_buffer),
-                                  remote_endpoint,
-                                  boost::bind(&Client::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     }
 
     void Client::Receiver(){
@@ -108,6 +95,33 @@ void RemoteConnection::doHeartbeat() {
 void RemoteConnection::resetHeartbeat() {
     nextHeartbeat.expires_from_now(boost::posix_time::seconds(HEARTBEAT_INTERVAL));
 }
+void RemoteConnection::receive() {
+    rx_socket->async_receive_from(boost::asio::buffer(rx_buffer),
+                              rx_endpoint,
+                              boost::bind(&RemoteConnection::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+}
+void RemoteConnection::handle_receive(const boost::system::error_code &error, size_t bytes_transferred) {
+    if (error) {
+        std::cout << "Receive failed: " << error.message() << "\n";
+        return;
+    }
+    //std::cout << "Received: '" << "$data" << "' (" << error.message() << ")\n";
+    if(bytes_transferred==MSG_SZ){
+        const networkMessage* msg = (const networkMessage*)(rx_buffer.data());
+        //std::cout<<"parsed message"<<std::endl;
+        auto msgPtr = networkMessage::mk_shared_copy(msg);
+        auto iter = std::find_if(endpointMap.begin(), endpointMap.end(), [this](std::pair<udp::endpoint,std::shared_ptr<Client>> x)->bool { return this->rx_endpoint.address() ==  x.first.address();});
+        if(iter != endpointMap.end()) {
+            iter->second->handle_receive(msgPtr);
+        } else{
+            std::cerr << "received message from unknown remote" << std::endl;
+        }
+    }
+    receive();
+}
+
 
 boost::asio::ip::udp::socket* RemoteConnection::rx_socket = nullptr;
 boost::asio::io_service* RemoteConnection::io_service = nullptr;
+bool RemoteConnection::initialised = false;
+std::set<std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>> RemoteConnection::endpointMap;

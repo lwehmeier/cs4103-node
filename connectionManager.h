@@ -18,6 +18,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <iostream>
 #include <deque>
+#include <set>
 #include "networkMessage.h"
 
 #define HEARTBEAT_INTERVAL 2ul
@@ -103,38 +104,54 @@ public:
     bool isAlive(){
         return alive;
     }
-    void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
+    void handle_receive(std::shared_ptr<networkMessage> msg);
     void wait();
     void Receiver();
     void queueEvent();
+    boost::asio::ip::udp::endpoint& getEndpoint(){
+        return remote_endpoint;
+    }
 };
 
 
 
 
 class RemoteConnection{
+    boost::array<char, MSG_SZ> rx_buffer;
+    boost::asio::ip::udp::endpoint rx_endpoint;
     Sender sender;
-    Client client;
+    std::shared_ptr<Client> client;
     static boost::asio::io_service* io_service;
+    static bool initialised;
     static boost::asio::ip::udp::socket *rx_socket;
+    static std::set<std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>> endpointMap;
     boost::asio::deadline_timer nextHeartbeat;
     bool alive = false;
     std::string remoteName;
 public:
     RemoteConnection(boost::asio::io_service* ios, std::string ip, int port):sender(ios, ip, port),
-                     client(ios, ip, port, rx_socket), nextHeartbeat(*ios), remoteName(ip) {
-        client.Receiver();
+                     nextHeartbeat(*ios), remoteName(ip) {
+        client = std::make_shared<Client>(ios, ip, port, rx_socket);
+        client->Receiver();
+        endpointMap.insert(std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>(client->getEndpoint(), client));
         enableHeartbeat();
+        if(!initialised){
+            initialised=true;
+            receive();
+        }
+    }
+    ~RemoteConnection(){
+        endpointMap.erase(std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>(client->getEndpoint(), client));
     }
     void sendMessage(std::shared_ptr<networkMessage> msg){
         resetHeartbeat();
         sender.put(msg);
     }
     std::shared_ptr<networkMessage> getMessage(){
-        return client.getMessage();
+        return client->getMessage();
     }
     int queuedRxMessages(){
-        return client.queuedMessages();
+        return client->queuedMessages();
     }
     static void setup(boost::asio::io_service* ios, int rxPort){
         io_service = ios;
@@ -145,11 +162,13 @@ public:
         }
     }
     bool isAlive(){
-        return client.isAlive();
+        return client->isAlive();
     }
     void enableHeartbeat();
     void doHeartbeat();
     void resetHeartbeat();
+    void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
+    void receive();
 };
 
 #endif //CS4103_CONNECTIONMANAGER_H
