@@ -8,7 +8,7 @@
 #define MSG_SZ 1036
 #include <memory>
 
-enum class MessageType_t { HEARTBEAT, TEXT, ELECTION, ACK, COORDINATOR };
+enum class MessageType_t { HEARTBEAT, TEXT, ELECTION, ACK, COORDINATOR, LOCK, UNLOCK, GRANT };
 
 struct networkMessage{
     int type= static_cast<int>(MessageType_t ::HEARTBEAT);

@@ -114,6 +114,9 @@ public:
     void registerCallback(callback_t cb, MessageType_t msgType){
         callbacks[static_cast<int>(msgType)] = cb;
     }
+    void unregisterCallback(MessageType_t msgType){
+        callbacks.erase(static_cast<int>(msgType));
+    }
     void registerTimeoutCallback(timeout_callback_t cb) {
         timeout_cb = cb;
     }
@@ -179,6 +182,9 @@ public:
     }
     void registerCallback(callback_t cb, MessageType_t msgType) {
         client->registerCallback(cb, msgType);
+    }
+    void unregisterCallback(MessageType_t msgType) {
+        client->unregisterCallback(msgType);
     }
     void registerTimeoutCallback(timeout_callback_t cb) {
         client->registerTimeoutCallback(cb);
