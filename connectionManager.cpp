@@ -1,5 +1,6 @@
 #include "connectionManager.h"
 #include "logging.h"
+#include "networkParser.h"
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
 using boost::asio::deadline_timer;
@@ -120,7 +121,12 @@ void RemoteConnection::handle_receive(const boost::system::error_code &error, si
         if(iter != endpointMap.end()) {
             iter->second->handle_receive(msgPtr);
         } else{
-            std::cerr << "received message from unknown remote" << std::endl;
+            if(rx_endpoint.address().to_string() == std::string("127.0.0.1")){
+                auto iter = std::find_if(endpointMap.begin(), endpointMap.end(), [](std::pair<udp::endpoint,std::shared_ptr<Client>> x)->bool { return getHost() ==  x.second->remoteHost;});
+                iter->second->handle_receive(msgPtr);
+            } else{
+                std::cerr << "received message from unknown remote" << rx_endpoint.address().to_string() << std::endl;
+            }
         }
     }
     receive();

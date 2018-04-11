@@ -81,16 +81,21 @@ int main(int argc, char* argv[])
         auto con = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
         connections[host] = con;
     }
+    election::setLeaderChange(leaderChanged);
+
 
     std::thread r([&] { ios.run(); });
 
 
     usleep(1000000ul * HEARTBEAT_TIMEOUT);
-    if(!election::election_leader){ //join network; if no leader broadcast was received in the last 2*TIMEOUT interval start election
-        election::startElection();
-        usleep(1000000ul);
+    while(!(bool)election::election_leader) {
+        if (!election::election_leader) { //join network; if no leader broadcast was received in the last 2*TIMEOUT interval start election
+            election::startElection();
+            usleep(1000000ul);
+        }
+
+        cout << "has leader: " << (bool) election::election_leader << endl;
     }
-    cout<<"has leader: "<<(bool)election::election_leader<<endl;
     if(argc == 2){
         election::startElection();
     }

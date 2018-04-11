@@ -25,6 +25,7 @@ bool lockManager::getLock(lockManager_callback_t cb){
 }
 void lockManager::leaderChanged(const std::pair<std::string, int>& remote) {
     cancel();
+    currentLockHolder.second=0;
     if(election::isCurrentLeader()){//we are leader
         for(auto host : hosts) {
             connections[host]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
@@ -73,7 +74,9 @@ void lockManager::grantLock(const std::pair<std::string, int>& remote){
     connections[currentLockHolder]->sendMessage(msg);
 }
 void lockManager::handleLock(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
+    std::cerr<<"received lock req from node "<<remote.first<<":"<<remote.second<<std::endl;
     if(currentLockHolder.second==0){
+        std::cerr<<"immed. granting req "<<std::endl;
         grantLock(remote);
         return;
     }
@@ -83,14 +86,16 @@ void lockManager::handleLock(std::shared_ptr<networkMessage> rxMessage, const st
     }
 }
 void lockManager::handleUnlock(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int> &remote) {
+    std::cerr<<"received unlock req from node "<<remote.first<<":"<<remote.second<<std::endl;
     if(remote == currentLockHolder){
-        currentLockHolder.second==0;
+        currentLockHolder.second=0;
         if(lockRequests.size()>0){
             grantLock(lockRequests.front());
             lockRequests.erase(lockRequests.begin());
         }
         return;
     }
+    std::cerr<<"current lock holder != unlocker "<<std::endl;
     auto iter = std::find(lockRequests.begin(), lockRequests.end(), remote);
     if(iter != lockRequests.end()){
         lockRequests.erase(iter);

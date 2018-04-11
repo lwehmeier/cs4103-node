@@ -61,6 +61,7 @@ public:
 };
 
 class Client {
+    friend class RemoteConnection;
     std::deque<std::shared_ptr<networkMessage>> queue;
     boost::asio::io_service* io_service;
     boost::asio::ip::udp::socket *socket;
