@@ -137,18 +137,73 @@ void election::handleAck(std::shared_ptr<networkMessage> rxMessage, const std::p
             int parsedPort = atoi(port.data());
             election_leader = new std::pair<string, int>(addr.data(), parsedPort);
             electionActive = false;
-            leaderchange(*election_leader);
-            std::cout<<"broadcasting new leader"<<election_leader->first<<":"<<election_leader->second<<std::endl;
             if(node_equals(*election_leader, getHost())){
                 isLeader = true;
                 std::cout<<"I am the new leader"<<std::endl;
             } else {
                 isLeader = false;
             }
+            createLeaderConIfNeeded();
+            leaderchange(*election_leader);
+            std::cout<<"broadcasting new leader"<<election_leader->first<<":"<<election_leader->second<<std::endl;
             for(std::pair<string, int> host: hosts) {
                 if(connections[host]->isAlive()) {
                     connections[host]->sendMessage(msg);
                 }
+            }
+        }
+    }
+}
+void election::createLeaderConIfNeeded(){
+    //return;
+    //clean up
+    //kill ephemeral connections
+    for(auto [host, con] : connections){
+        if(con->isEphemeral){
+            cout << "closing ephemeral connection to " << host.first << ":"
+                 << host.second << endl;
+            connections.erase(host);
+            //hosts.erase(host);
+        }
+    }
+    //setup new connections
+    if(!isLeader) { //init connection to leader
+        auto iter = connections.find(*election_leader);
+        if (iter == connections.end()) {
+            //hosts.insert(*election_leader);
+            src::severity_logger<severity_levels> lg(keywords::severity = normal);
+            BOOST_LOG_SEV(lg, normal) << "Starting ephemeral connection to unconnected master node: "
+                                      << election_leader->first << ":" << election_leader->second << std::endl;
+            cout << "Starting ephemeral connection to unconnected master node: " << election_leader->first << ":"
+                 << election_leader->second << endl;
+            auto con = std::make_shared<RemoteConnection>(election_leader->first, election_leader->second);
+            con->registerCallback(&election::handleElection, MessageType_t::ELECTION);
+            con->registerCallback(&election::handleAck, MessageType_t::ACK);
+            con->registerCallback(&election::handleCoord, MessageType_t::COORDINATOR);
+            con->registerTimeoutCallback(&election::handleTimeout);
+            //con->isEphemeral = true;
+            connections[*election_leader] = con;
+        }
+    }
+    else{//create connections to clients
+        cout << "Starting ephemeral client connections" << endl;
+        for(auto host : getAllHosts()){
+            cout << "checking node " << host.first << ":" << host.second << std::endl;
+            auto iter = connections.find(host);
+            if (iter == connections.end()) {
+                //hosts.insert(host);
+                src::severity_logger<severity_levels> lg(keywords::severity = normal);
+                BOOST_LOG_SEV(lg, normal) << "Starting ephemeral connection to unconnected client node: "
+                                          << host.first << ":" << host.second;
+                cout << "Starting ephemeral connection to unconnected client node: " << host.first << ":"
+                     << host.second << endl;
+                auto con = std::make_shared<RemoteConnection>(host.first, host.second);
+                con->registerCallback(&election::handleElection, MessageType_t::ELECTION);
+                con->registerCallback(&election::handleAck, MessageType_t::ACK);
+                con->registerCallback(&election::handleCoord, MessageType_t::COORDINATOR);
+                con->registerTimeoutCallback(&election::handleTimeout);
+                //con->isEphemeral = true;
+                connections[host] = con;
             }
         }
     }
@@ -170,7 +225,6 @@ void election::handleCoord(std::shared_ptr<networkMessage> rxMessage, const std:
         return;
     }
     election_leader = ldr;
-    leaderchange(*election_leader);
     std::cout<<getHost().first<<getHost().second<<" == " << election_leader->first << election_leader -> second << node_equals(*election_leader, getHost()) << endl;
     if(node_equals(*election_leader, getHost())){
         isLeader = true;
@@ -178,6 +232,8 @@ void election::handleCoord(std::shared_ptr<networkMessage> rxMessage, const std:
     } else {
         isLeader = false;
     }
+    createLeaderConIfNeeded();
+    leaderchange(*election_leader);
     std::cout<<"broadcasting new leader"<<ldr->first<<":"<<ldr->second<<std::endl;
     for(std::pair<string, int> host: hosts) {
         if(!node_equals(host,remote) && connections[host]->isAlive()) {

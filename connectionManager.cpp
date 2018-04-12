@@ -1,6 +1,7 @@
 #include "connectionManager.h"
 #include "logging.h"
 #include "networkParser.h"
+#include "main.h"
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
 using boost::asio::deadline_timer;
@@ -102,6 +103,12 @@ void RemoteConnection::doHeartbeat() {
 void RemoteConnection::resetHeartbeat() {
     nextHeartbeat.expires_from_now(boost::posix_time::seconds(HEARTBEAT_INTERVAL));
 }
+void RemoteConnection::handleTimeout() {
+    if(isEphemeral){
+        hosts.erase(client->remoteHost);
+        connections.erase(client->remoteHost);
+    }
+}
 void RemoteConnection::receive() {
     rx_socket->async_receive_from(boost::asio::buffer(rx_buffer),
                               rx_endpoint,
@@ -112,6 +119,7 @@ void RemoteConnection::handle_receive(const boost::system::error_code &error, si
         std::cout << "Receive failed: " << error.message() << "\n";
         return;
     }
+    std::cout << "received message from remote" << rx_endpoint.address().to_string() << std::endl;
     //std::cout << "Received: '" << "$data" << "' (" << error.message() << ")\n";
     if(bytes_transferred==MSG_SZ){
         const networkMessage* msg = (const networkMessage*)(rx_buffer.data());

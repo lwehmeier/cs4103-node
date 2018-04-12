@@ -27,12 +27,12 @@ void lockManager::leaderChanged(const std::pair<std::string, int>& remote) {
     cancel();
     currentLockHolder.second=0;
     if(election::isCurrentLeader()){//we are leader
-        for(auto host : hosts) {
+        for(auto [host, con ]: connections) {
             connections[host]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
             connections[host]->registerCallback(lockManager::handleUnlock, MessageType_t::UNLOCK);
         }
-        connections[getHost()]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
-        connections[getHost()]->registerCallback(lockManager::handleUnlock, MessageType_t::UNLOCK);
+        //connections[getHost()]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
+        //connections[getHost()]->registerCallback(lockManager::handleUnlock, MessageType_t::UNLOCK);
     } else{
         for(auto host : hosts) {
             connections[host]->unregisterCallback(MessageType_t::LOCK);

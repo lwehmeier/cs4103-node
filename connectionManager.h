@@ -22,7 +22,7 @@
 #include <functional>
 #include "networkMessage.h"
 
-#define HEARTBEAT_INTERVAL 2ul
+#define HEARTBEAT_INTERVAL 10ul
 #define HEARTBEAT_TIMEOUT (2.5*HEARTBEAT_INTERVAL)
 
 typedef std::function<void(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote)> callback_t;
@@ -94,6 +94,7 @@ public:
         queue_notification.async_wait(boost::bind(&Client::queueEvent, this));
     }
     ~Client(){
+        std::cout<<"Client connection to "<<remoteHost.first<<":"<<remoteHost.second<<"killed"<<std::endl;
         boost::system::error_code ignored_ec;
         //if(socket.is_open()) {
         //    socket.cancel(ignored_ec);
@@ -146,6 +147,7 @@ class RemoteConnection{
     bool alive = false;
     std::string remoteName;
 public:
+    bool isEphemeral = false;
     RemoteConnection(boost::asio::io_service* ios, std::string ip, int port):sender(ios, ip, port),
                      nextHeartbeat(*ios), remoteName(ip) {
         client = std::make_shared<Client>(ios, ip, port, rx_socket);
@@ -157,8 +159,11 @@ public:
             receive();
         }
     }
+    RemoteConnection(std::string ip, int port):RemoteConnection(io_service, ip, port){}
     ~RemoteConnection(){
+        std::cout<<"Client connection to "<<client->remoteHost.first<<":"<<client->remoteHost.second<<"killed"<<std::endl;
         endpointMap.erase(std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>(client->getEndpoint(), client));
+        nextHeartbeat.cancel();
     }
     void sendMessage(std::shared_ptr<networkMessage> msg){
         resetHeartbeat();
@@ -188,13 +193,14 @@ public:
         client->unregisterCallback(msgType);
     }
     void registerTimeoutCallback(timeout_callback_t cb) {
-        client->registerTimeoutCallback(cb);
+        client->registerTimeoutCallback(cb);//([this, cb](const std::pair<std::string, int>& remote){cb(remote); this->handleTimeout();});
     }
     void enableHeartbeat();
     void doHeartbeat();
     void resetHeartbeat();
     void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
     void receive();
+    void handleTimeout();
 };
 
 #endif //CS4103_CONNECTIONMANAGER_H

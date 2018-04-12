@@ -32,6 +32,7 @@ public:
     static void handleAck(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote);
     static void handleCoord(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote);
     static void handleTimeout(const std::pair<std::string, int>& remote);
+    static void createLeaderConIfNeeded();
 };
 
 

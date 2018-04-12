@@ -52,7 +52,7 @@ void readGraph(){
             gname(get_property(networkGraph,graph_name));
     dp.property("name",gname);
 
-    std::ifstream dot(std::string("../generatedNetwork.dot"));//"/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
+    std::ifstream dot(std::string("/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
     bool status = read_graphviz(dot,networkGraph,dp,"node_id");
 
     long i = *(networkGraph.vertex_set().begin());
@@ -103,3 +103,25 @@ set<pair<string, int>> getNeighbourHosts(){
     }
     return hosts;
 }
+set<pair<string, int>> getAllHosts() {
+    set<pair<string,int>> hosts;
+    int ourVertex;
+    for(int i = 0; i < networkGraph.m_vertices.size(); i++){
+        string label = networkGraph.m_vertices[i].m_property.label;
+        if(label.substr(0, strcspn(label.data(), ":")) == getIdentity()){
+            ourVertex = i;
+        }
+    }
+    typename graph_traits < graph_t >::out_edge_iterator ei, ei_end;
+
+    for(auto v : networkGraph.m_vertices) {
+        string label = v.m_property.label;
+        if(!(label.substr(0, strcspn(label.data(), ":")) == getIdentity())) {//not us
+            string addr = label.substr(0, strcspn(label.data(), ":"));
+            int port = atoi(label.substr(strcspn(label.data(), ":") + 1).data());
+            pair<string, int> node(addr, port);
+            hosts.insert(node);
+        }
+    }
+    return hosts;
+};

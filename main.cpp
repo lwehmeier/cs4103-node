@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
         BOOST_LOG_SEV(lg, normal) << "Starting connection to local node: " << host.first <<":"<<host.second;
         cout<<"connecting to host: "<<host.first<<":"<<host.second<<endl;
         auto con = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
+        con->registerTimeoutCallback([](const std::pair<std::string, int>& remote){cerr<<"loopback connection timed out"<<endl;});
         connections[host] = con;
     }
     election::setLeaderChange(leaderChanged);
@@ -99,10 +100,29 @@ int main(int argc, char* argv[])
     if(argc == 2){
         election::startElection();
     }
-    lockManager::leaderChanged(*election::election_leader);
+    //lockManager::leaderChanged(*election::election_leader);
     usleep(250);
-    lockManager::getLock([](){std::cout<<">>>>>>>>>>>>>got lock<<<<<<<<<<"<<std::endl;});
-    lockManager::getLock(lockManager::unlock);
+
+    char inp = ' ';
+    std::cout<<"Select action: "<<endl<<"c: crash node" << endl << "q: quit node" <<endl<< "l: acquire lock and unlock immediately" <<endl;
+    while(inp != 'c'){
+        if(std::cin >> inp) {
+            if (inp == 'q') {
+                break;
+            }
+            switch (inp) {
+                case 'l':
+                    lockManager::getLock([]() { std::cout << ">>>>>>>>>>>>>got lock<<<<<<<<<<" << std::endl; });
+                    lockManager::getLock(lockManager::unlock);
+                    break;
+                default:
+                    break;
+            }
+            std::cout<<"Select action: "<<endl<<"c: crash node" << endl << "q: quit node" <<endl<< "l: acquire lock and unlock immediately" <<endl;
+        }else{
+            usleep(1000000ul*20);
+        }
+    }
 /*
     while(1){
         if(!isLeader && !electionActive && (election_leader && !connections[*election_leader]->isAlive() || !election_leader)){ //let's catch some pointers

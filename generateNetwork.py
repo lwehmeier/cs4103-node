@@ -1,4 +1,5 @@
 import sys
+from igraph import *
 
 def mkDot(hosts):
     dot = 'digraph {\ngraph [name="networkGraph"]\n'
@@ -8,12 +9,34 @@ def mkDot(hosts):
         dot += str(id) + '[label="'+h+':12345"];\n'
         nameIdMap[h]=id
         id=chr(ord(id)+1)
-    for h in hosts:
-        for h2 in hosts:
-            if h != h2:
-                dot+= nameIdMap[h] +"->"+nameIdMap[h2]+";\n"
+#    for h in hosts:
+#        for h2 in hosts:
+#            if h != h2:
+#                dot+= nameIdMap[h] +"->"+nameIdMap[h2]+";\n"
+    for src, tgtList in mkFFGraph(hosts).items():
+        for tgt in tgtList:
+            dot+= nameIdMap[src] +"->"+nameIdMap[tgt]+";\n"
     dot+="}"
     return dot
+def mkFFGraph(hosts):
+    hostId = {}
+    i = 0
+    for host in hosts:
+        hostId[i]=host
+        i+=1
+    g = Graph.Forest_Fire(i, 0.5, 0)
+    layout = g.layout("kk")
+    plot(g, layout = layout)
+    adjList = g.get_adjlist(mode=ALL)
+    connections = {}
+    for v in range(len(adjList)):
+        cNode = hostId[v]
+        connections[cNode]=[]
+        adj = adjList[v]
+        for vt in adj:
+            connections[cNode].append(hostId[vt])
+    return connections
+
 def mkPssh(hosts):
     pssh = ""
     for h in hosts:

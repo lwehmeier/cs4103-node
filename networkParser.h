@@ -11,4 +11,5 @@ void readGraph();
 std::string getIdentity();
 std::set<std::pair<std::string, int>> getNeighbourHosts();
 std::pair<std::string, int> getHost();
+std::set<std::pair<std::string, int>> getAllHosts();
 #endif //CS4103_NETWORKPARSER_H
