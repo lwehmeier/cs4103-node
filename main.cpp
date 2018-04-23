@@ -19,15 +19,13 @@
 #include "main.h"
 #include "election.h"
 #include "lockManager.h"
+#include "visitorAccessMgr.h"
+#include "clientHandler.h"
 
 void handler(int sig) {
     void *array[10];
     size_t size;
-
-    // get void*'s for all entries on the stack
     size = backtrace(array, 10);
-
-    // print out all the frames to stderr
     fprintf(stderr, "Error: signal %d:\n", sig);
     backtrace_symbols_fd(array, size, STDERR_FILENO);
     exit(1);
@@ -45,8 +43,10 @@ std::unordered_map<std::pair<string, int>, std::shared_ptr<RemoteConnection>, pa
 
 void leaderChanged(const std::pair<std::string, int>& remote){
     lockManager::leaderChanged(remote);
+    if(election::isLeader) {
+        VisitorAccessManager::init_leader(5);
+    }
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -103,6 +103,8 @@ int main(int argc, char* argv[])
     //lockManager::leaderChanged(*election::election_leader);
     usleep(250);
 
+    handleClient();
+
     char inp = ' ';
     std::cout<<"Select action: "<<endl<<"c: crash node" << endl << "q: quit node" <<endl<< "l: acquire lock and unlock immediately" <<endl;
     while(inp != 'c'){
@@ -123,42 +125,6 @@ int main(int argc, char* argv[])
             usleep(1000000ul*20);
         }
     }
-/*
-    while(1){
-        if(!isLeader && !electionActive && (election_leader && !connections[*election_leader]->isAlive() || !election_leader)){ //let's catch some pointers
-            cout<<"new election"<<endl;
-            startElection();
-        }
-        for(const std::pair<string, int>& host: hosts) {
-            if(connections[host]->isAlive() && connections[host]->queuedRxMessages()) {
-                auto msg = connections[host]->getMessage();
-                switch (msg->type){
-                    case static_cast<int>(MessageType_t::HEARTBEAT) :
-                        cerr<<"WARN: Heartbeat message in rx queue"<<host.first<<":"<<host.second<<endl;
-                        break;
-                    case static_cast<int>(MessageType_t::TEXT) :
-                        cout<<"received text message from node"<<host.first<<":"<<host.second<<endl;
-                        break;
-                   case static_cast<int>(MessageType_t::ELECTION) :
-                        //cout<<"received election message from node"<<host.first<<":"<<host.second<<endl;
-                        handleElection(msg, host);
-                        break;
-                    case static_cast<int>(MessageType_t::ACK) :
-                        //cout<<"received ack message from node"<<host.first<<":"<<host.second<<endl;
-                        handleAck(msg, host);
-                        break;
-                    case static_cast<int>(MessageType_t::COORDINATOR) :
-                        //cout<<"received coordinator message from node"<<host.first<<":"<<host.second<<endl;
-                        handleCoord(msg, host);
-                        break;
-                    default:
-                        cerr<<"WARN: Received unknown message of type: "<<msg->type<<" from "<<host.first<<":"<<host.second<<endl;
-                        break;
-                }
-            }
-        }
-    }*/
-
     r.join();
     return 0;
 }

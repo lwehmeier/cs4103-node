@@ -22,7 +22,7 @@
 #include <functional>
 #include "networkMessage.h"
 
-#define HEARTBEAT_INTERVAL 10ul
+#define HEARTBEAT_INTERVAL 2ul
 #define HEARTBEAT_TIMEOUT (2.5*HEARTBEAT_INTERVAL)
 
 typedef std::function<void(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote)> callback_t;

@@ -1,3 +1,6 @@
 [submodule "boost-cmake"]
 	path = boost-cmake
 	url = git@github.com:lwehmeier/boost-cmake.git
+[submodule "SQLiteCpp"]
+	path = SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp
