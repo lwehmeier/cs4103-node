@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8" />
+      <title>report</title>
+      <style>.markdown-preview:not([data-use-github-style]) { padding: 2em; font-size: 1.2em; color: rgb(171, 178, 191); background-color: rgb(40, 44, 52); overflow: auto; }
+.markdown-preview:not([data-use-github-style]) > :first-child { margin-top: 0px; }
+.markdown-preview:not([data-use-github-style]) h1, .markdown-preview:not([data-use-github-style]) h2, .markdown-preview:not([data-use-github-style]) h3, .markdown-preview:not([data-use-github-style]) h4, .markdown-preview:not([data-use-github-style]) h5, .markdown-preview:not([data-use-github-style]) h6 { line-height: 1.2; margin-top: 1.5em; margin-bottom: 0.5em; color: rgb(255, 255, 255); }
+.markdown-preview:not([data-use-github-style]) h1 { font-size: 2.4em; font-weight: 300; }
+.markdown-preview:not([data-use-github-style]) h2 { font-size: 1.8em; font-weight: 400; }
+.markdown-preview:not([data-use-github-style]) h3 { font-size: 1.5em; font-weight: 500; }
+.markdown-preview:not([data-use-github-style]) h4 { font-size: 1.2em; font-weight: 600; }
+.markdown-preview:not([data-use-github-style]) h5 { font-size: 1.1em; font-weight: 600; }
+.markdown-preview:not([data-use-github-style]) h6 { font-size: 1em; font-weight: 600; }
+.markdown-preview:not([data-use-github-style]) strong { color: rgb(255, 255, 255); }
+.markdown-preview:not([data-use-github-style]) del { color: rgb(124, 135, 156); }
+.markdown-preview:not([data-use-github-style]) a, .markdown-preview:not([data-use-github-style]) a code { color: rgb(82, 139, 255); }
+.markdown-preview:not([data-use-github-style]) img { max-width: 100%; }
+.markdown-preview:not([data-use-github-style]) > p { margin-top: 0px; margin-bottom: 1.5em; }
+.markdown-preview:not([data-use-github-style]) > ul, .markdown-preview:not([data-use-github-style]) > ol { margin-bottom: 1.5em; }
+.markdown-preview:not([data-use-github-style]) blockquote { margin: 1.5em 0px; font-size: inherit; color: rgb(124, 135, 156); border-color: rgb(75, 83, 98); border-width: 4px; }
+.markdown-preview:not([data-use-github-style]) hr { margin: 3em 0px; border-top: 2px dashed rgb(75, 83, 98); background: none; }
+.markdown-preview:not([data-use-github-style]) table { margin: 1.5em 0px; }
+.markdown-preview:not([data-use-github-style]) th { color: rgb(255, 255, 255); }
+.markdown-preview:not([data-use-github-style]) th, .markdown-preview:not([data-use-github-style]) td { padding: 0.66em 1em; border: 1px solid rgb(75, 83, 98); }
+.markdown-preview:not([data-use-github-style]) code { color: rgb(255, 255, 255); background-color: rgb(58, 63, 75); }
+.markdown-preview:not([data-use-github-style]) pre.editor-colors { margin: 1.5em 0px; padding: 1em; font-size: 0.92em; border-radius: 3px; background-color: rgb(49, 54, 63); }
+.markdown-preview:not([data-use-github-style]) kbd { color: rgb(255, 255, 255); border-width: 1px 1px 2px; border-style: solid; border-color: rgb(75, 83, 98) rgb(75, 83, 98) rgb(62, 68, 81); border-image: initial; background-color: rgb(58, 63, 75); }
+.markdown-preview[data-use-github-style] { font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif; line-height: 1.6; word-wrap: break-word; padding: 30px; font-size: 16px; color: rgb(51, 51, 51); background-color: rgb(255, 255, 255); overflow: scroll; }
+.markdown-preview[data-use-github-style] > :first-child { margin-top: 0px !important; }
+.markdown-preview[data-use-github-style] > :last-child { margin-bottom: 0px !important; }
+.markdown-preview[data-use-github-style] a:not([href]) { color: inherit; text-decoration: none; }
+.markdown-preview[data-use-github-style] .absent { color: rgb(204, 0, 0); }
+.markdown-preview[data-use-github-style] .anchor { position: absolute; top: 0px; left: 0px; display: block; padding-right: 6px; padding-left: 30px; margin-left: -30px; }
+.markdown-preview[data-use-github-style] .anchor:focus { outline: none; }
+.markdown-preview[data-use-github-style] h1, .markdown-preview[data-use-github-style] h2, .markdown-preview[data-use-github-style] h3, .markdown-preview[data-use-github-style] h4, .markdown-preview[data-use-github-style] h5, .markdown-preview[data-use-github-style] h6 { position: relative; margin-top: 1em; margin-bottom: 16px; font-weight: bold; line-height: 1.4; }
+.markdown-preview[data-use-github-style] h1 .octicon-link, .markdown-preview[data-use-github-style] h2 .octicon-link, .markdown-preview[data-use-github-style] h3 .octicon-link, .markdown-preview[data-use-github-style] h4 .octicon-link, .markdown-preview[data-use-github-style] h5 .octicon-link, .markdown-preview[data-use-github-style] h6 .octicon-link { display: none; color: rgb(0, 0, 0); vertical-align: middle; }
+.markdown-preview[data-use-github-style] h1:hover .anchor, .markdown-preview[data-use-github-style] h2:hover .anchor, .markdown-preview[data-use-github-style] h3:hover .anchor, .markdown-preview[data-use-github-style] h4:hover .anchor, .markdown-preview[data-use-github-style] h5:hover .anchor, .markdown-preview[data-use-github-style] h6:hover .anchor { padding-left: 8px; margin-left: -30px; text-decoration: none; }
+.markdown-preview[data-use-github-style] h1:hover .anchor .octicon-link, .markdown-preview[data-use-github-style] h2:hover .anchor .octicon-link, .markdown-preview[data-use-github-style] h3:hover .anchor .octicon-link, .markdown-preview[data-use-github-style] h4:hover .anchor .octicon-link, .markdown-preview[data-use-github-style] h5:hover .anchor .octicon-link, .markdown-preview[data-use-github-style] h6:hover .anchor .octicon-link { display: inline-block; }
+.markdown-preview[data-use-github-style] h1 tt, .markdown-preview[data-use-github-style] h2 tt, .markdown-preview[data-use-github-style] h3 tt, .markdown-preview[data-use-github-style] h4 tt, .markdown-preview[data-use-github-style] h5 tt, .markdown-preview[data-use-github-style] h6 tt, .markdown-preview[data-use-github-style] h1 code, .markdown-preview[data-use-github-style] h2 code, .markdown-preview[data-use-github-style] h3 code, .markdown-preview[data-use-github-style] h4 code, .markdown-preview[data-use-github-style] h5 code, .markdown-preview[data-use-github-style] h6 code { font-size: inherit; }
+.markdown-preview[data-use-github-style] h1 { padding-bottom: 0.3em; font-size: 2.25em; line-height: 1.2; border-bottom: 1px solid rgb(238, 238, 238); }
+.markdown-preview[data-use-github-style] h1 .anchor { line-height: 1; }
+.markdown-preview[data-use-github-style] h2 { padding-bottom: 0.3em; font-size: 1.75em; line-height: 1.225; border-bottom: 1px solid rgb(238, 238, 238); }
+.markdown-preview[data-use-github-style] h2 .anchor { line-height: 1; }
+.markdown-preview[data-use-github-style] h3 { font-size: 1.5em; line-height: 1.43; }
+.markdown-preview[data-use-github-style] h3 .anchor { line-height: 1.2; }
+.markdown-preview[data-use-github-style] h4 { font-size: 1.25em; }
+.markdown-preview[data-use-github-style] h4 .anchor { line-height: 1.2; }
+.markdown-preview[data-use-github-style] h5 { font-size: 1em; }
+.markdown-preview[data-use-github-style] h5 .anchor { line-height: 1.1; }
+.markdown-preview[data-use-github-style] h6 { font-size: 1em; color: rgb(119, 119, 119); }
+.markdown-preview[data-use-github-style] h6 .anchor { line-height: 1.1; }
+.markdown-preview[data-use-github-style] p, .markdown-preview[data-use-github-style] blockquote, .markdown-preview[data-use-github-style] ul, .markdown-preview[data-use-github-style] ol, .markdown-preview[data-use-github-style] dl, .markdown-preview[data-use-github-style] table, .markdown-preview[data-use-github-style] pre { margin-top: 0px; margin-bottom: 16px; }
+.markdown-preview[data-use-github-style] hr { height: 4px; padding: 0px; margin: 16px 0px; background-color: rgb(231, 231, 231); border: 0px none; }
+.markdown-preview[data-use-github-style] ul, .markdown-preview[data-use-github-style] ol { padding-left: 2em; }
+.markdown-preview[data-use-github-style] ul.no-list, .markdown-preview[data-use-github-style] ol.no-list { padding: 0px; list-style-type: none; }
+.markdown-preview[data-use-github-style] ul ul, .markdown-preview[data-use-github-style] ul ol, .markdown-preview[data-use-github-style] ol ol, .markdown-preview[data-use-github-style] ol ul { margin-top: 0px; margin-bottom: 0px; }
+.markdown-preview[data-use-github-style] li > p { margin-top: 16px; }
+.markdown-preview[data-use-github-style] dl { padding: 0px; }
+.markdown-preview[data-use-github-style] dl dt { padding: 0px; margin-top: 16px; font-size: 1em; font-style: italic; font-weight: bold; }
+.markdown-preview[data-use-github-style] dl dd { padding: 0px 16px; margin-bottom: 16px; }
+.markdown-preview[data-use-github-style] blockquote { padding: 0px 15px; color: rgb(119, 119, 119); border-left: 4px solid rgb(221, 221, 221); }
+.markdown-preview[data-use-github-style] blockquote > :first-child { margin-top: 0px; }
+.markdown-preview[data-use-github-style] blockquote > :last-child { margin-bottom: 0px; }
+.markdown-preview[data-use-github-style] table { display: block; width: 100%; overflow: auto; word-break: keep-all; }
+.markdown-preview[data-use-github-style] table th { font-weight: bold; }
+.markdown-preview[data-use-github-style] table th, .markdown-preview[data-use-github-style] table td { padding: 6px 13px; border: 1px solid rgb(221, 221, 221); }
+.markdown-preview[data-use-github-style] table tr { background-color: rgb(255, 255, 255); border-top: 1px solid rgb(204, 204, 204); }
+.markdown-preview[data-use-github-style] table tr:nth-child(2n) { background-color: rgb(248, 248, 248); }
+.markdown-preview[data-use-github-style] img { max-width: 100%; box-sizing: border-box; }
+.markdown-preview[data-use-github-style] .emoji { max-width: none; }
+.markdown-preview[data-use-github-style] span.frame { display: block; overflow: hidden; }
+.markdown-preview[data-use-github-style] span.frame > span { display: block; float: left; width: auto; padding: 7px; margin: 13px 0px 0px; overflow: hidden; border: 1px solid rgb(221, 221, 221); }
+.markdown-preview[data-use-github-style] span.frame span img { display: block; float: left; }
+.markdown-preview[data-use-github-style] span.frame span span { display: block; padding: 5px 0px 0px; clear: both; color: rgb(51, 51, 51); }
+.markdown-preview[data-use-github-style] span.align-center { display: block; overflow: hidden; clear: both; }
+.markdown-preview[data-use-github-style] span.align-center > span { display: block; margin: 13px auto 0px; overflow: hidden; text-align: center; }
+.markdown-preview[data-use-github-style] span.align-center span img { margin: 0px auto; text-align: center; }
+.markdown-preview[data-use-github-style] span.align-right { display: block; overflow: hidden; clear: both; }
+.markdown-preview[data-use-github-style] span.align-right > span { display: block; margin: 13px 0px 0px; overflow: hidden; text-align: right; }
+.markdown-preview[data-use-github-style] span.align-right span img { margin: 0px; text-align: right; }
+.markdown-preview[data-use-github-style] span.float-left { display: block; float: left; margin-right: 13px; overflow: hidden; }
+.markdown-preview[data-use-github-style] span.float-left span { margin: 13px 0px 0px; }
+.markdown-preview[data-use-github-style] span.float-right { display: block; float: right; margin-left: 13px; overflow: hidden; }
+.markdown-preview[data-use-github-style] span.float-right > span { display: block; margin: 13px auto 0px; overflow: hidden; text-align: right; }
+.markdown-preview[data-use-github-style] code, .markdown-preview[data-use-github-style] tt { padding: 0.2em 0px; margin: 0px; font-size: 85%; background-color: rgba(0, 0, 0, 0.0392157); border-radius: 3px; }
+.markdown-preview[data-use-github-style] code::before, .markdown-preview[data-use-github-style] tt::before, .markdown-preview[data-use-github-style] code::after, .markdown-preview[data-use-github-style] tt::after { letter-spacing: -0.2em; content: " "; }
+.markdown-preview[data-use-github-style] code br, .markdown-preview[data-use-github-style] tt br { display: none; }
+.markdown-preview[data-use-github-style] del code { text-decoration: inherit; }
+.markdown-preview[data-use-github-style] pre > code { padding: 0px; margin: 0px; font-size: 100%; word-break: normal; white-space: pre; background: transparent; border: 0px; }
+.markdown-preview[data-use-github-style] .highlight { margin-bottom: 16px; }
+.markdown-preview[data-use-github-style] .highlight pre, .markdown-preview[data-use-github-style] pre { padding: 16px; overflow: auto; font-size: 85%; line-height: 1.45; background-color: rgb(247, 247, 247); border-radius: 3px; }
+.markdown-preview[data-use-github-style] .highlight pre { margin-bottom: 0px; word-break: normal; }
+.markdown-preview[data-use-github-style] pre { word-wrap: normal; }
+.markdown-preview[data-use-github-style] pre code, .markdown-preview[data-use-github-style] pre tt { display: inline; max-width: initial; padding: 0px; margin: 0px; overflow: initial; line-height: inherit; word-wrap: normal; background-color: transparent; border: 0px; }
+.markdown-preview[data-use-github-style] pre code::before, .markdown-preview[data-use-github-style] pre tt::before, .markdown-preview[data-use-github-style] pre code::after, .markdown-preview[data-use-github-style] pre tt::after { content: normal; }
+.markdown-preview[data-use-github-style] kbd { display: inline-block; padding: 3px 5px; font-size: 11px; line-height: 10px; color: rgb(85, 85, 85); vertical-align: middle; background-color: rgb(252, 252, 252); border-width: 1px; border-style: solid; border-color: rgb(204, 204, 204) rgb(204, 204, 204) rgb(187, 187, 187); border-image: initial; border-radius: 3px; box-shadow: rgb(187, 187, 187) 0px -1px 0px inset; }
+.markdown-preview[data-use-github-style] a { color: rgb(51, 122, 183); }
+.markdown-preview[data-use-github-style] code { color: inherit; }
+.markdown-preview[data-use-github-style] pre.editor-colors { padding: 0.8em 1em; margin-bottom: 1em; font-size: 0.85em; border-radius: 4px; overflow: auto; }
+.scrollbars-visible-always .markdown-preview pre.editor-colors .vertical-scrollbar, .scrollbars-visible-always .markdown-preview pre.editor-colors .horizontal-scrollbar { visibility: hidden; }
+.scrollbars-visible-always .markdown-preview pre.editor-colors:hover .vertical-scrollbar, .scrollbars-visible-always .markdown-preview pre.editor-colors:hover .horizontal-scrollbar { visibility: visible; }
+.markdown-preview .task-list-item-checkbox { position: absolute; margin: 0.25em 0px 0px -1.4em; }
+.bracket-matcher .region {
+  border-bottom: 1px dotted lime;
+  position: absolute;
+}
+.line-number.bracket-matcher {
+  background-color: #777;
+}
+
+.spell-check-misspelling .region {
+  border-bottom: 2px dotted rgba(255, 51, 51, 0.75);
+}
+.spell-check-corrections {
+  width: 25em !important;
+}
+
+pre.editor-colors {
+  background-color: #282c34;
+  color: #abb2bf;
+}
+pre.editor-colors .line.cursor-line {
+  background-color: rgba(153, 187, 255, 0.04);
+}
+pre.editor-colors .invisible {
+  color: #abb2bf;
+}
+pre.editor-colors .cursor {
+  border-left: 2px solid #528bff;
+}
+pre.editor-colors .selection .region {
+  background-color: #3e4451;
+}
+pre.editor-colors .bracket-matcher .region {
+  border-bottom: 1px solid #528bff;
+  box-sizing: border-box;
+}
+pre.editor-colors .invisible-character {
+  color: rgba(171, 178, 191, 0.15);
+}
+pre.editor-colors .indent-guide {
+  color: rgba(171, 178, 191, 0.15);
+}
+pre.editor-colors .wrap-guide {
+  background-color: rgba(171, 178, 191, 0.15);
+}
+pre.editor-colors .find-result .region.region.region,
+pre.editor-colors .current-result .region.region.region {
+  border-radius: 2px;
+  background-color: rgba(82, 139, 255, 0.24);
+  transition: border-color 0.4s;
+}
+pre.editor-colors .find-result .region.region.region {
+  border: 2px solid transparent;
+}
+pre.editor-colors .current-result .region.region.region {
+  border: 2px solid #528bff;
+  transition-duration: .1s;
+}
+pre.editor-colors .gutter .line-number {
+  color: #636d83;
+  -webkit-font-smoothing: antialiased;
+}
+pre.editor-colors .gutter .line-number.cursor-line {
+  color: #abb2bf;
+  background-color: #2c313a;
+}
+pre.editor-colors .gutter .line-number.cursor-line-no-selection {
+  background-color: transparent;
+}
+pre.editor-colors .gutter .line-number .icon-right {
+  color: #abb2bf;
+}
+pre.editor-colors .gutter:not(.git-diff-icon) .line-number.git-line-removed.git-line-removed::before {
+  bottom: -3px;
+}
+pre.editor-colors .gutter:not(.git-diff-icon) .line-number.git-line-removed::after {
+  content: "";
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 25px;
+  border-bottom: 1px dotted rgba(224, 82, 82, 0.5);
+  pointer-events: none;
+}
+pre.editor-colors .gutter .line-number.folded,
+pre.editor-colors .gutter .line-number:after,
+pre.editor-colors .fold-marker:after {
+  color: #abb2bf;
+}
+.syntax--comment {
+  color: #5c6370;
+  font-style: italic;
+}
+.syntax--comment .syntax--markup.syntax--link {
+  color: #5c6370;
+}
+.syntax--entity.syntax--name.syntax--type {
+  color: #e5c07b;
+}
+.syntax--entity.syntax--other.syntax--inherited-class {
+  color: #98c379;
+}
+.syntax--keyword {
+  color: #c678dd;
+}
+.syntax--keyword.syntax--control {
+  color: #c678dd;
+}
+.syntax--keyword.syntax--operator {
+  color: #abb2bf;
+}
+.syntax--keyword.syntax--other.syntax--special-method {
+  color: #61afef;
+}
+.syntax--keyword.syntax--other.syntax--unit {
+  color: #d19a66;
+}
+.syntax--storage {
+  color: #c678dd;
+}
+.syntax--storage.syntax--type.syntax--annotation,
+.syntax--storage.syntax--type.syntax--primitive {
+  color: #c678dd;
+}
+.syntax--storage.syntax--modifier.syntax--package,
+.syntax--storage.syntax--modifier.syntax--import {
+  color: #abb2bf;
+}
+.syntax--constant {
+  color: #d19a66;
+}
+.syntax--constant.syntax--variable {
+  color: #d19a66;
+}
+.syntax--constant.syntax--character.syntax--escape {
+  color: #56b6c2;
+}
+.syntax--constant.syntax--numeric {
+  color: #d19a66;
+}
+.syntax--constant.syntax--other.syntax--color {
+  color: #56b6c2;
+}
+.syntax--constant.syntax--other.syntax--symbol {
+  color: #56b6c2;
+}
+.syntax--variable {
+  color: #e06c75;
+}
+.syntax--variable.syntax--interpolation {
+  color: #be5046;
+}
+.syntax--variable.syntax--parameter {
+  color: #abb2bf;
+}
+.syntax--string {
+  color: #98c379;
+}
+.syntax--string.syntax--regexp {
+  color: #56b6c2;
+}
+.syntax--string.syntax--regexp .syntax--source.syntax--ruby.syntax--embedded {
+  color: #e5c07b;
+}
+.syntax--string.syntax--other.syntax--link {
+  color: #e06c75;
+}
+.syntax--punctuation.syntax--definition.syntax--comment {
+  color: #5c6370;
+}
+.syntax--punctuation.syntax--definition.syntax--method-parameters,
+.syntax--punctuation.syntax--definition.syntax--function-parameters,
+.syntax--punctuation.syntax--definition.syntax--parameters,
+.syntax--punctuation.syntax--definition.syntax--separator,
+.syntax--punctuation.syntax--definition.syntax--seperator,
+.syntax--punctuation.syntax--definition.syntax--array {
+  color: #abb2bf;
+}
+.syntax--punctuation.syntax--definition.syntax--heading,
+.syntax--punctuation.syntax--definition.syntax--identity {
+  color: #61afef;
+}
+.syntax--punctuation.syntax--definition.syntax--bold {
+  color: #e5c07b;
+  font-weight: bold;
+}
+.syntax--punctuation.syntax--definition.syntax--italic {
+  color: #c678dd;
+  font-style: italic;
+}
+.syntax--punctuation.syntax--section.syntax--embedded {
+  color: #be5046;
+}
+.syntax--punctuation.syntax--section.syntax--method,
+.syntax--punctuation.syntax--section.syntax--class,
+.syntax--punctuation.syntax--section.syntax--inner-class {
+  color: #abb2bf;
+}
+.syntax--support.syntax--class {
+  color: #e5c07b;
+}
+.syntax--support.syntax--type {
+  color: #56b6c2;
+}
+.syntax--support.syntax--function {
+  color: #56b6c2;
+}
+.syntax--support.syntax--function.syntax--any-method {
+  color: #61afef;
+}
+.syntax--entity.syntax--name.syntax--function {
+  color: #61afef;
+}
+.syntax--entity.syntax--name.syntax--class,
+.syntax--entity.syntax--name.syntax--type.syntax--class {
+  color: #e5c07b;
+}
+.syntax--entity.syntax--name.syntax--section {
+  color: #61afef;
+}
+.syntax--entity.syntax--name.syntax--tag {
+  color: #e06c75;
+}
+.syntax--entity.syntax--other.syntax--attribute-name {
+  color: #d19a66;
+}
+.syntax--entity.syntax--other.syntax--attribute-name.syntax--id {
+  color: #61afef;
+}
+.syntax--meta.syntax--class {
+  color: #e5c07b;
+}
+.syntax--meta.syntax--class.syntax--body {
+  color: #abb2bf;
+}
+.syntax--meta.syntax--method-call,
+.syntax--meta.syntax--method {
+  color: #abb2bf;
+}
+.syntax--meta.syntax--definition.syntax--variable {
+  color: #e06c75;
+}
+.syntax--meta.syntax--link {
+  color: #d19a66;
+}
+.syntax--meta.syntax--require {
+  color: #61afef;
+}
+.syntax--meta.syntax--selector {
+  color: #c678dd;
+}
+.syntax--meta.syntax--separator {
+  background-color: #373b41;
+  color: #abb2bf;
+}
+.syntax--meta.syntax--tag {
+  color: #abb2bf;
+}
+.syntax--underline {
+  text-decoration: underline;
+}
+.syntax--none {
+  color: #abb2bf;
+}
+.syntax--invalid.syntax--deprecated {
+  color: #523d14 !important;
+  background-color: #e0c285 !important;
+}
+.syntax--invalid.syntax--illegal {
+  color: white !important;
+  background-color: #e05252 !important;
+}
+.syntax--markup.syntax--bold {
+  color: #d19a66;
+  font-weight: bold;
+}
+.syntax--markup.syntax--changed {
+  color: #c678dd;
+}
+.syntax--markup.syntax--deleted {
+  color: #e06c75;
+}
+.syntax--markup.syntax--italic {
+  color: #c678dd;
+  font-style: italic;
+}
+.syntax--markup.syntax--heading {
+  color: #e06c75;
+}
+.syntax--markup.syntax--heading .syntax--punctuation.syntax--definition.syntax--heading {
+  color: #61afef;
+}
+.syntax--markup.syntax--link {
+  color: #56b6c2;
+}
+.syntax--markup.syntax--inserted {
+  color: #98c379;
+}
+.syntax--markup.syntax--quote {
+  color: #d19a66;
+}
+.syntax--markup.syntax--raw {
+  color: #98c379;
+}
+.syntax--source.syntax--c .syntax--keyword.syntax--operator {
+  color: #c678dd;
+}
+.syntax--source.syntax--cpp .syntax--keyword.syntax--operator {
+  color: #c678dd;
+}
+.syntax--source.syntax--cs .syntax--keyword.syntax--operator {
+  color: #c678dd;
+}
+.syntax--source.syntax--css .syntax--property-name,
+.syntax--source.syntax--css .syntax--property-value {
+  color: #828997;
+}
+.syntax--source.syntax--css .syntax--property-name.syntax--support,
+.syntax--source.syntax--css .syntax--property-value.syntax--support {
+  color: #abb2bf;
+}
+.syntax--source.syntax--elixir .syntax--source.syntax--embedded.syntax--source {
+  color: #abb2bf;
+}
+.syntax--source.syntax--elixir .syntax--constant.syntax--language,
+.syntax--source.syntax--elixir .syntax--constant.syntax--numeric,
+.syntax--source.syntax--elixir .syntax--constant.syntax--definition {
+  color: #61afef;
+}
+.syntax--source.syntax--elixir .syntax--variable.syntax--definition,
+.syntax--source.syntax--elixir .syntax--variable.syntax--anonymous {
+  color: #c678dd;
+}
+.syntax--source.syntax--elixir .syntax--quoted {
+  color: #98c379;
+}
+.syntax--source.syntax--elixir .syntax--keyword.syntax--special-method,
+.syntax--source.syntax--elixir .syntax--embedded.syntax--section,
+.syntax--source.syntax--elixir .syntax--embedded.syntax--source.syntax--empty {
+  color: #e06c75;
+}
+.syntax--source.syntax--elixir .syntax--readwrite.syntax--module .syntax--punctuation {
+  color: #e06c75;
+}
+.syntax--source.syntax--elixir .syntax--regexp.syntax--section,
+.syntax--source.syntax--elixir .syntax--regexp.syntax--string {
+  color: #be5046;
+}
+.syntax--source.syntax--elixir .syntax--separator,
+.syntax--source.syntax--elixir .syntax--keyword.syntax--operator {
+  color: #d19a66;
+}
+.syntax--source.syntax--elixir .syntax--variable.syntax--constant {
+  color: #e5c07b;
+}
+.syntax--source.syntax--elixir .syntax--array,
+.syntax--source.syntax--elixir .syntax--scope,
+.syntax--source.syntax--elixir .syntax--section {
+  color: #828997;
+}
+.syntax--source.syntax--gfm .syntax--markup {
+  -webkit-font-smoothing: auto;
+}
+.syntax--source.syntax--gfm .syntax--link .syntax--entity {
+  color: #61afef;
+}
+.syntax--source.syntax--go .syntax--storage.syntax--type.syntax--string {
+  color: #c678dd;
+}
+.syntax--source.syntax--ini .syntax--keyword.syntax--other.syntax--definition.syntax--ini {
+  color: #e06c75;
+}
+.syntax--source.syntax--java .syntax--storage.syntax--modifier.syntax--import {
+  color: #e5c07b;
+}
+.syntax--source.syntax--java .syntax--storage.syntax--type {
+  color: #e5c07b;
+}
+.syntax--source.syntax--java .syntax--keyword.syntax--operator.syntax--instanceof {
+  color: #c678dd;
+}
+.syntax--source.syntax--java-properties .syntax--meta.syntax--key-pair {
+  color: #e06c75;
+}
+.syntax--source.syntax--java-properties .syntax--meta.syntax--key-pair > .syntax--punctuation {
+  color: #abb2bf;
+}
+.syntax--source.syntax--js .syntax--keyword.syntax--operator {
+  color: #56b6c2;
+}
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--delete,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--in,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--of,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--instanceof,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--new,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--typeof,
+.syntax--source.syntax--js .syntax--keyword.syntax--operator.syntax--void {
+  color: #c678dd;
+}
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--dictionary.syntax--json > .syntax--string.syntax--quoted.syntax--json {
+  color: #e06c75;
+}
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--dictionary.syntax--json > .syntax--string.syntax--quoted.syntax--json > .syntax--punctuation.syntax--string {
+  color: #e06c75;
+}
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--dictionary.syntax--json > .syntax--value.syntax--json > .syntax--string.syntax--quoted.syntax--json,
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--array.syntax--json > .syntax--value.syntax--json > .syntax--string.syntax--quoted.syntax--json,
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--dictionary.syntax--json > .syntax--value.syntax--json > .syntax--string.syntax--quoted.syntax--json > .syntax--punctuation,
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--array.syntax--json > .syntax--value.syntax--json > .syntax--string.syntax--quoted.syntax--json > .syntax--punctuation {
+  color: #98c379;
+}
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--dictionary.syntax--json > .syntax--constant.syntax--language.syntax--json,
+.syntax--source.syntax--json .syntax--meta.syntax--structure.syntax--array.syntax--json > .syntax--constant.syntax--language.syntax--json {
+  color: #56b6c2;
+}
+.syntax--source.syntax--ruby .syntax--constant.syntax--other.syntax--symbol > .syntax--punctuation {
+  color: inherit;
+}
+.syntax--source.syntax--python .syntax--keyword.syntax--operator.syntax--logical.syntax--python {
+  color: #c678dd;
+}
+.syntax--source.syntax--python .syntax--variable.syntax--parameter {
+  color: #d19a66;
+}
+</style>
+  </head>
+  <body class='markdown-preview' data-use-github-style><p><em>author:</em> 170025929</p>
+<h1 id="cs4103-practical-2-distributed-entry-nodes">CS4103 Practical 2 - Distributed Entry Nodes</h1>
+<h2 id="implemented-functionality-and-extensions">Implemented Functionality and Extensions</h2>
+<ul>
+<li>Random network generation using provided hosts<ul>
+<li>Network Visualisation</li>
+</ul>
+</li>
+<li>Automated network parsing and self-identification for each node</li>
+<li>Automatic start of election process if no leader is present</li>
+<li>Automatic election of a new leader if the leader node dies</li>
+<li>If a leader cannot reach more than half of its followers, it shuts down to prevent two leaders in separated network segments if the network was split</li>
+<li>Leader election using the wireless election algorithm presented in lecture 11, week6</li>
+<li>Logging</li>
+<li>Logging to a central server using the syslog protocol</li>
+<li>Regular leader broadcasts to prevent new/restarted nodes from starting a new election</li>
+<li>Heartbeat messages for crash detection</li>
+<li>Resource access control by the coordinator using a token valid for max 2s</li>
+<li>Token times out if a client crashes</li>
+<li>If multiple resource access requests are queued, these are combined into a single request.</li>
+<li>Resource release once a client finished using it</li>
+<li>Maximum visitor entries, all ticket numbers of visitors currently in the park are stored in a shared sqlite database (performance over index free database)</li>
+<li>Visitors can enter and leave the park at any node</li>
+<li>Client: simple UDP interface</li>
+</ul>
+<h2 id="design">Design</h2>
+<h3 id="network-parsing-node-setup">Network Parsing/Node Setup</h3>
+<p>Each node is given a network graph (format: graphviz dot) that specifies the possible connections between nodes and the machine and port a node runs on. During initialisation, each node parses the network graph, uses the hostname of the machine its running on to identify which graph vertex it is represented by, and sets up connections to all reachable nodes in the network.
+This setup method has been used to be able to start each node with the same command using automation tools like pssh. However, this also means that only one node can be run per machine, which I considered not to be a problem as not forbidden in the practical specification.</p>
+<p>Implementation: <code>networkParser.h</code> <code>networkParser.cpp</code></p>
+<h3 id="inter-node-communication">Inter-Node Communication</h3>
+<p>To reduce overhead, the nodes communicate using UDP connections. The communication subsystem uses fixed-sized messages of different types that can have a payload. The currently used and implemented message types are : <code>HEARTBEAT, TEXT, ELECTION, ACK, COORDINATOR, LOCK, UNLOCK, GRANT</code>. For each message type and connection a callback can be registered which will be executed when a message of the specified type arrives from the specified remote. Message handling is performed on one asynchronous background thread using udp socket operations and boost::asio for asynchronous operations support.</p>
+<p>Implementation: <code>connectionManager.h</code> <code>connectionManager.cpp</code> <code>networkMessage.h</code> <code>networkMessage.cpp</code></p>
+<h3 id="leader-election">Leader Election</h3>
+<p>Leader election is performed according to the wireless election algorithm as presented in slide set 11, week 6. Once a node is elected as leader, it establishes ephemeral connections to all other nodes (as required by the specifications of the assignment). Those connections will automatically be removed if they time out or if a new leader is elected.
+A unlimited number of sequential elections is supported. While the system has not been designed to support  concurrent elections, they seemed to work fine in my tests (when several nodes are started at once, e.g. by my runPSSH script, they sometimes start several concurrent elections).</p>
+<p>Implementation: <code>election.h</code> <code>election.cpp</code></p>
+<h3 id="access-control">Access Control</h3>
+<p><strong><em>Node Resource Access Control</em></strong></p>
+<p>If a node need to access the visitor database, it needs to request a resource lock from the current coordinator/leader by sending a <code>LOCK</code> message. The leader will reply with a <code>GRANT</code> message, either immediately or once the current resource lock expires. The lock is valid only for a defined time period (current implementation: 2 seconds) or until it is released by the node that acquired it (<code>UNLOCK</code> message sent to leader from current lock holder). Implementation-wise all resource requests provide a callback that gets executed once a <code>GRANT</code> message is received. If several requests are outstanding, the provided callbacks are combined to be executed in a single request. If an election is in progress, no resource requests are possible and will be rejected. If the leader changes while a resource request is outstanding, the outstanding requests are cancelled. This is possible in the designated use case as the customer can simply rescan their ticket a second later.</p>
+<p><strong><em>Client Access Control</em></strong></p>
+<p>A sqlite3 database is used to store all current visitors of the park and the maximum permitted number of concurrent visitors. When a client presents a ticket number, database access is requested by the corresponding node and, if the ticket is not currently in the park and the number of current visitors is smaller than the permitted number of visitors, the ticket id is added to the database and access is granted to the visitor. If the park is full or an election is in progress, the visitor is asked to retry later. When leaving, the node requests a resource lock, checks if the ticket exists in the database and removes it if it exists.
+A sqlite database is used instead of a simple file for performance reasons. The index structure of a database allows for significantly more efficient access once a few dozen visitors are in the park. The visitor limit is stored in the cfg table, it can be changed there or in the visitorAccessMgr.cpp file. <em>Note:</em> The database is persistent, i.e. the visitors in the park will be remembered after a system restart.</p>
+<p>Implementation: <code>lockManager.h</code> <code>lockManager.cpp</code> <code>visitorAccessMgr.h</code> <code>visitorAccessMgr.cpp</code></p>
+<h3 id="fault-tolerance">Fault Tolerance</h3>
+<p>All connections are monitored using a regular heart beat message with interval and timeout specified in <code>connectionManager.h</code>. To reduce network traffic, heartbeat messages are only sent if the connection has been idle for &gt;= HEARTBEAT_INTERVAL. On the receiving side, all messages received by a remote host fullfill the heartbeat functionality. The current heartbeat interval is 2 seconds, the heartbeat timeout is 2.5*2 seconds to account for possible connection and processing delays.</p>
+<p>Implementation: <code>connectionManager.h</code> <code>connectionManager.cpp</code> <code>election.h</code> <code>election.cpp</code></p>
+<h3 id="logging">Logging</h3>
+<p>Logging is implemented using boost::log with different sinks for console output and syslog-compatible (RFC5424) network logging.
+The severity levels <code>trace, debug, info, warning, error</code> are supported. On stdout all messages of severity &gt;= debug will be shown. The syslog backend will send out all messages as filtering should be done server-side when using a network logging system.
+On stdout the node id is omitted as all output clearly comes from the single node instance running on the machine. The severity level is also omitted to provide log output similar to the example given in the practical specifications: <code>[2018-04-23 15:13:11] - Election: received ack message. from pc5-003-l:12345</code>.</p>
+<p>The network log sink include host, timestamp, component and message: <code>(shortened)</code> <code>Rfc5424SyslogEvent [level=7, timestamp=15:22:34, appName=pc5-021-l.cs.st-andrews.ac.uk,  structuredData=Connections:, message=Received heartbeat from pc5-021-l</code>. <em>Note:</em> level 7 equals log level trace.</p>
+<p>Implementation: <code>logging.h</code> <code>logging.cpp</code></p>
+<h3 id="client-interface">Client Interface</h3>
+<p>Each node provides a simple, text-based interface to one or multiple clients (i.e. ticket/entry gates) via a UDP connection to port <code>1234</code> to the machine the node runs on. The interface allows to request access for a ticket number (<code>e ticketID</code>, e.g. <code>e 1234</code>), request exit permission (<code>l ticketID</code>) which will only be granted if the ticket was previously used to enter the park through any entry gate, list all current visitors (debug functionality, not protected against race conditions, won't lock database; <code>v</code>), terminate the node (<code>q</code> or <code>c</code>) and provides functionality to start an election (debug, not needed as the system will automatically elect a new leader if required; <code>E</code>). A ticket ID may only be used to enter the park once until it is used to leave the park. Before each command a newline must be entered.</p>
+<h3 id="cli">CLI</h3>
+<p>The syslog server, network graph file and visitor database location must be specified as command line arguments on program execution.</p>
+<h2 id="examples-and-testing">Examples and Testing</h2>
+<p>The nodes were continuously tested during development on randomly generated network graphs of 3 to 25 machines.
+As the network layout changes every time a network is generated, the large number of test runs performed during development should suffice to cover all realistically occurring edge cases. As the nodes need to be run on different machines by design, unit testing becomes very complicated and thus is not done on this project.</p>
+<h3 id="example-1-node-receives-election-messages-from-several-connected-nodes">Example 1: Node receives election messages from several connected nodes</h3>
+<pre class="editor-colors lang-"><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;election&nbsp;message.&nbsp;Setting&nbsp;parent&nbsp;to&nbsp;pc5-004-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;election&nbsp;message.&nbsp;Already&nbsp;has&nbsp;parent,&nbsp;sending&nbsp;ack&nbsp;to&nbsp;pc5-003-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;ack&nbsp;message.&nbsp;from&nbsp;pc5-003-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;ack&nbsp;message.&nbsp;from&nbsp;pc5-002-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;acks&nbsp;from&nbsp;all&nbsp;adjacent&nbsp;nodes.&nbsp;Sending&nbsp;ack&nbsp;to&nbsp;parent:&nbsp;pc5-004-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;highest&nbsp;received&nbsp;metric:&nbsp;pc5-001-l:12345:611442</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;new&nbsp;leader:&nbsp;pc5-001-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;I&nbsp;am&nbsp;the&nbsp;new&nbsp;leader</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Post&nbsp;Election:&nbsp;Starting&nbsp;ephemeral&nbsp;client&nbsp;connections</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Main:&nbsp;leader&nbsp;changed</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Checking&nbsp;and&nbsp;preparing&nbsp;database&nbsp;after&nbsp;leader&nbsp;change:&nbsp;/cs/home/lw96/cs4103/visitors.db3</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;broadcasting&nbsp;new&nbsp;leaderpc5-001-l:12345</span></span></div></pre><h3 id="example-2-node-starts-election-and-broadcasts-new-leader">Example 2: Node starts election and broadcasts new leader</h3>
+<pre class="editor-colors lang-"><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;starting&nbsp;election</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;ack&nbsp;message.&nbsp;from&nbsp;pc5-003-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;ack&nbsp;message.&nbsp;from&nbsp;pc5-001-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;received&nbsp;acks&nbsp;from&nbsp;all&nbsp;adjacent&nbsp;nodes.&nbsp;Election&nbsp;done</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;highest&nbsp;received&nbsp;metric:&nbsp;pc5-001-l:12345:611442</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Main:&nbsp;leader&nbsp;changed</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;15:13:11]&nbsp;-&nbsp;Election:&nbsp;broadcasting&nbsp;new&nbsp;leaderpc5-001-l:12345</span></span></div></pre><h3 id="example-3-lock-and-unlock-request">Example 3: Lock and Unlock request</h3>
+<pre class="editor-colors lang-"><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;14:45:03]&nbsp;-&nbsp;LockManager:&nbsp;received&nbsp;lock&nbsp;req&nbsp;from&nbsp;node&nbsp;pc5-004-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;14:45:03]&nbsp;-&nbsp;LockManager:&nbsp;Sent&nbsp;grant&nbsp;to&nbsp;node&nbsp;pc5-004-l:12345</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>[2018-04-23&nbsp;14:45:03]&nbsp;-&nbsp;LockManager:&nbsp;received&nbsp;unlock&nbsp;req&nbsp;from&nbsp;node&nbsp;pc5-004-l:12345</span></span></div></pre><h3 id="example-4-less-than-half-of-the-network-reachable-by-master-syslog">Example 4: Less than half of the network reachable by master, syslog</h3>
+<pre class="editor-colors lang-"><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>&gt;&gt;&gt;&nbsp;Syslog&nbsp;message&nbsp;came:&nbsp;Rfc5424SyslogEvent&nbsp;[prioVersion=&lt;10&gt;Apr,&nbsp;facility=1,&nbsp;level=2,&nbsp;version=-1,&nbsp;timestamp=18:51:35,</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>appName=pc5-003-l.cs.st-andrews.ac.uk,&nbsp;procId=pc5-003-l,&nbsp;msgId=:,&nbsp;structuredData=Master:,</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>message=Lost&nbsp;connections&nbsp;to&nbsp;majority&nbsp;of&nbsp;network.&nbsp;Shutting&nbsp;down&nbsp;to&nbsp;avoid&nbsp;network&nbsp;split</span></span></div></pre><h3 id="example-5-client-interface">Example 5: Client Interface</h3>
+<pre class="editor-colors lang-"><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>pc5-002-l:~/dev/simple-syslog-server&nbsp;lw96$&nbsp;nc&nbsp;-u&nbsp;pc5-001-l&nbsp;1234</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>&nbsp;</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>Select&nbsp;action:</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>c:&nbsp;crash&nbsp;node</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>q:&nbsp;quit&nbsp;node</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>E:&nbsp;start&nbsp;a&nbsp;new&nbsp;election</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>e&nbsp;&lt;ticketID&gt;:&nbsp;new&nbsp;entry</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>l&nbsp;&lt;ticketID&gt;:&nbsp;leaving&nbsp;visitor</span></span></div><div class="line"><span class="syntax--text syntax--plain syntax--null-grammar"><span>v:&nbsp;print&nbsp;current&nbsp;visitors</span></span></div></pre><h2 id="evaluation">Evaluation</h2>
+<p>Functionality implemented as described above.
+Potential improvements:</p>
+<ul>
+<li>Kill concurrent elections as they can cause unnecessary traffic and potentially undesired behaviour</li>
+<li>More advanced access control, e.g. resource blocks<ul>
+<li>Not implemented as it would be complicated to decide which tickets entered the park if a client crashes while it holds a lock for a number of tickets. I implemented the combining of requests instead.</li>
+</ul>
+</li>
+<li>Flexible Network<ul>
+<li>Would allow a more dynamic system; however, it would be hard to decide if a master is connected to a majority of the network. This is important if all central wireless nodes fail and the network splits. If both network segments elect independent leaders, this can lead to multiple clients getting a resource lock and accessing the same resource concurrently.</li>
+</ul>
+</li>
+</ul>
+<h2 id="used-libraries">Used Libraries</h2>
+<p>Libraries are included as submodules from their GitHub projects and thus not additionally linked here.</p>
+<ul>
+<li>boost::asio</li>
+<li>boost::log</li>
+<li>boost::graph</li>
+<li>SQLiteCPP</li>
+<li>sqlite3</li>
+<li>pssh</li>
+<li>simple-syslog-server</li>
+<li>python igraph</li>
+<li>python pycairo</li>
+</ul>
+<h2 id="build-system">Build System</h2>
+<h3 id="cmake">CMake</h3>
+<p>The node developed for the practical entirely relies on CMake as build system. It can be build by simply running <code>cmake /pat/to/project</code> and <code>make</code>. All required libraries will be downloaded, compiled and linked as necessary. As the specifications require the project to ship all libraries that are being used, the compilation can take several minutes as several boost components and the sqlite3 library need to be build. As several C++17 features are used in the code, an up-to-date CMake and gcc installation is required. The clang compiler should also work, although extensive testing was only performed using the gcc available on the school's Fedora machines.</p>
+<p><em>Note:</em> The code relies heavily on the boost library, the template resolution issues of several gcc and clang versions can cause it to use up to 3GB RAM during compilation.</p>
+<h3 id="python">Python</h3>
+<p>As I did not want to manually create several different, potentially large network setups for testing, I build a python script to generate randomized network layouts using the ForestFire algorithm and corresponding scripts to build and run the node on different machines. This requires the python igraph librariy to generate the network graph and the pssh module to deploy to the machines.
+All required modules will automatically installed into a python3 virtual environment located within the project directory.</p>
+<p><em>Note:</em> A bug in the python venv module does not allow for nested virtual environments. If the scripts are executed in an active virtual environment, the already activated environment will be used to install the required libraries.</p>
+<h3 id="java">Java</h3>
+<p>To allow for central logging of all log messages of different severities of all nodes, the syslog protocol is used. Again, as the specifications require shipping all required libraries and tools, I added a simple, standalone java-based syslog server project that is automatically build using maven. However, I recommend running a more powerful syslog system to receive and view the log messages.</p>
+<h3 id="summary">Summary</h3>
+<p>Required build environment:</p>
+<ul>
+<li>JDK 8</li>
+<li>maven</li>
+<li>cmake</li>
+<li>gcc</li>
+<li>python3</li>
+<li>netcat</li>
+</ul>
+<h3 id="usage">Usage</h3>
+<p><em>Note:</em> The project folder must be on a drive shared by all machines.</p>
+<p>Initial setup: <code>bash setup.sh</code></p>
+<p>Generate randomized network: <code>python3 generateNetwork.py host1 host2 host3 ... hostn</code></p>
+<p>Example: <code>python generateNetwork.py pc5-002-l pc5-001-l pc5-003-l pc5-004-l pc5-007-l pc5-008-l pc5-009-l pc5-011-l pc5-020-l pc5-021-l pc5-027-l pc5-029-l</code></p>
+<p>Build nodes on all machines in the network: <code>bash build.sh</code></p>
+<p>Start syslog server on local machine: <code>bash runLogserver.sh</code></p>
+<p>Run on all machines: <code>bash runPSSH.sh</code>. <em>Note:</em> requires accessible ssh key to connect to all machines and host keys of those machines in known_hosts.</p>
+<p>Connect to the nodes to terminate them or present an enter/exit ticket: <code>ncat -u host 1234</code> and press enter</p>
+<p><em>1978 words exclusive log snippets</em></p></body>
+</html>

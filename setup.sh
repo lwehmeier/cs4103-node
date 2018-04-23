@@ -18,4 +18,6 @@ source tools/python-venv/bin/activate
 cd tools/pssh
 python setup.py build
 python setup.py install
+pip install pycairo
 pip install python-igraph
+
