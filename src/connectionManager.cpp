@@ -1,3 +1,4 @@
+#include <election.h>
 #include "connectionManager.h"
 #include "logging.h"
 #include "networkParser.h"
@@ -26,7 +27,6 @@ void Sender::send() {
     auto buffer = boost::asio::buffer(msg,MSG_SZ);
     auto sent = socket.send_to(buffer, remote_endpoint, 0, err);
     queue.pop_front();
-    //std::cout << "Sent Payload --- " << sent << "\n";
     queueEvent();
 }
 
@@ -40,9 +40,9 @@ void Client::handle_receive(std::shared_ptr<networkMessage> msg) {
     }
     else {
         if (msg->type == 0) {
-            //std::cout<<"Received heartbeat from "<<remoteName << std::endl;
+            BOOST_LOG_SEV(Logger::getLogger(), trace)<<"Connections: Received heartbeat from "<<remoteName <<std::endl;
         } else {
-            //std::cout<<"Received message from "<<remoteName << std::endl;
+            BOOST_LOG_SEV(Logger::getLogger(), trace)<<"Connections: Received non-heartbeat message from "<<remoteName <<std::endl;
             queue.push_back(msg);
         }
     }
@@ -51,39 +51,24 @@ void Client::handle_receive(std::shared_ptr<networkMessage> msg) {
 }
 
     void Client::wait() {
-        // Set a deadline for the asynchronous operation.
         deadline_.expires_from_now(boost::posix_time::seconds(HEARTBEAT_TIMEOUT));
     }
 
     void Client::Receiver(){
         wait();
     }
-
+void Client::expire_deadline(){
+    BOOST_LOG_SEV(Logger::getLogger(), info)<<"Connections: deadline expired for node "<<remoteName<<std::endl;
+    alive = false;
+    timeout_cb(remoteHost);
+    deadline_.expires_at(boost::posix_time::pos_infin);
+}
 void Client::check_deadline()
 {
-    // Check whether the deadline has passed. We compare the deadline against
-    // the current time since a new asynchronous operation may have moved the
-    // deadline before this actor had a chance to run.
     if (deadline_.expires_at() <= deadline_timer::traits_type::now() && socket->is_open())
     {
-        std::cout<<"deadline expired for remote "<<remoteName<<std::endl;
-        src::severity_logger< severity_levels > lg(keywords::severity = normal);
-        BOOST_LOG_SEV(lg, warning) << "Connection to node timed out: " << remoteName;
-        alive = false;
-        timeout_cb(remoteHost);
-        // The deadline has passed. The outstanding asynchronous operation needs
-        // to be cancelled so that the blocked receive() function will return.
-        //
-        // Please note that cancel() has portability issues on some versions of
-        // Microsoft Windows, and it may be necessary to use close() instead.
-        // Consult the documentation for cancel() for further information.
-        //socket.cancel();
-
-        // There is no longer an active deadline. The expiry is set to positive
-        // infinity so that the actor takes no action until a new deadline is set.
-        deadline_.expires_at(boost::posix_time::pos_infin);
+        expire_deadline();
     }
-    // Put the actor back to sleep.
     deadline_.async_wait(boost::bind(&Client::check_deadline, this));
 }
 
@@ -95,8 +80,14 @@ void RemoteConnection::enableHeartbeat() {
 void RemoteConnection::doHeartbeat() {
     if (nextHeartbeat.expires_at() <= deadline_timer::traits_type::now()){
         resetHeartbeat();
-        //std::cout<<"Sending heartbeat to "<<remoteName<<std::endl;
-        sendMessage(std::make_shared<networkMessage>());
+        if(!election::isLeader) {
+            sendMessage(std::make_shared<networkMessage>());
+        } else { // If we are leader -> broadcast coordinator message instead of heartbeat message. Allows new clients to find coordinator without starting election
+            auto msg = std::make_shared<networkMessage>();
+            msg->type = static_cast<int>(MessageType_t::COORDINATOR);
+            sprintf(msg->data, "%s:%d:%d", getIdentity().data(), getHost().second, election::getUptime());
+            sendMessage(msg);
+        }
     }
     nextHeartbeat.async_wait(boost::bind(&RemoteConnection::doHeartbeat, this));
 }
@@ -116,14 +107,12 @@ void RemoteConnection::receive() {
 }
 void RemoteConnection::handle_receive(const boost::system::error_code &error, size_t bytes_transferred) {
     if (error) {
-        std::cout << "Receive failed: " << error.message() << "\n";
+        BOOST_LOG_SEV(Logger::getLogger(), severity_levels::error)<<"Connections: Receive failed: " << error.message()<<std::endl;
         return;
     }
-    std::cout << "received message from remote" << rx_endpoint.address().to_string() << std::endl;
-    //std::cout << "Received: '" << "$data" << "' (" << error.message() << ")\n";
+    BOOST_LOG_SEV(Logger::getLogger(), trace)<<"Connections: received message from remote" << rx_endpoint.address().to_string() <<std::endl;
     if(bytes_transferred==MSG_SZ){
         const networkMessage* msg = (const networkMessage*)(rx_buffer.data());
-        //std::cout<<"parsed message"<<std::endl;
         auto msgPtr = networkMessage::mk_shared_copy(msg);
         auto iter = std::find_if(endpointMap.begin(), endpointMap.end(), [this](std::pair<udp::endpoint,std::shared_ptr<Client>> x)->bool { return this->rx_endpoint.address() ==  x.first.address();});
         if(iter != endpointMap.end()) {
@@ -133,7 +122,7 @@ void RemoteConnection::handle_receive(const boost::system::error_code &error, si
                 auto iter = std::find_if(endpointMap.begin(), endpointMap.end(), [](std::pair<udp::endpoint,std::shared_ptr<Client>> x)->bool { return getHost() ==  x.second->remoteHost;});
                 iter->second->handle_receive(msgPtr);
             } else{
-                std::cerr << "received message from unknown remote" << rx_endpoint.address().to_string() << std::endl;
+                BOOST_LOG_SEV(Logger::getLogger(), trace)<<"Connections: received message from unknown remote" << rx_endpoint.address().to_string()  <<std::endl;
             }
         }
     }

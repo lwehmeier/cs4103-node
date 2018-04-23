@@ -11,6 +11,7 @@
 
 bool lockManager::getLock(lockManager_callback_t cb){
     if(!election::election_leader || election::electionActive){
+        BOOST_LOG_SEV(Logger::getLogger(), info)<<"LockManager: The system currently has no leader, could not request lock."<<std::endl;
         return false; //we currently don't have a leader
     }
     lockCallbacks.push_back(cb);
@@ -31,8 +32,6 @@ void lockManager::leaderChanged(const std::pair<std::string, int>& remote) {
             connections[host]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
             connections[host]->registerCallback(lockManager::handleUnlock, MessageType_t::UNLOCK);
         }
-        //connections[getHost()]->registerCallback(lockManager::handleLock, MessageType_t::LOCK);
-        //connections[getHost()]->registerCallback(lockManager::handleUnlock, MessageType_t::UNLOCK);
     } else{
         for(auto host : hosts) {
             connections[host]->unregisterCallback(MessageType_t::LOCK);
@@ -51,17 +50,17 @@ void lockManager::unlock(){
     if(!election::election_leader || election::electionActive){
         return; //we currently don't have a leader
     }
-    std::cout<<"releasing lock"<<std::endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: releasing lock"<<std::endl;
     auto msg = std::make_shared<networkMessage>();
     msg->type= static_cast<int>(MessageType_t::UNLOCK);
     connections[*election::election_leader]->sendMessage(msg);
 }
 void lockManager::lockAcquired(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
     if(!node_equals(remote, *election::election_leader)){//received grant from non leader node
-        std::cerr<<"received grant from non-master node "<<remote.first<<":"<<remote.second<<std::endl;
+        BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: received grant from non-master node "<<remote.first<<":"<<remote.second<<std::endl;
         return;
     }
-    std::cout<<"acquired lock"<<std::endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: acquired lock"<<std::endl;
     for(auto f : lockCallbacks){
         f();
     }
@@ -82,7 +81,7 @@ void lockManager::expire_lock(){
     }
 }
 void lockManager::handleLock(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
-    std::cerr<<"received lock req from node "<<remote.first<<":"<<remote.second<<std::endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: received lock req from node "<<remote.first<<":"<<remote.second<<std::endl;
     if(currentLockHolder.second==0){
         grantLock(remote);
         return;
@@ -93,7 +92,7 @@ void lockManager::handleLock(std::shared_ptr<networkMessage> rxMessage, const st
     }
 }
 void lockManager::handleUnlock(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int> &remote) {
-    std::cerr<<"received unlock req from node "<<remote.first<<":"<<remote.second<<std::endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: received unlock req from node "<<remote.first<<":"<<remote.second<<std::endl;
     if(remote == currentLockHolder){
         currentLockHolder.second=0;
         if(lockRequests.size()>0){
@@ -102,7 +101,7 @@ void lockManager::handleUnlock(std::shared_ptr<networkMessage> rxMessage, const 
         }
         return;
     }
-    std::cerr<<"current lock holder != unlocker "<<std::endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"LockManager: current lock holder != unlocker "<<std::endl;
     auto iter = std::find(lockRequests.begin(), lockRequests.end(), remote);
     if(iter != lockRequests.end()){
         lockRequests.erase(iter);

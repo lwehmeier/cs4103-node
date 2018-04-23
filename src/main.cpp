@@ -23,6 +23,7 @@
 #include "clientHandler.h"
 std::string DATABASE_PATH;
 std::string NETWORKGRAPH_PATH;
+std::string LOG_SRV;
 
 void handler(int sig) {
     void *array[10];
@@ -36,26 +37,25 @@ void handler(int sig) {
 bool node_equals(const std::pair<string, int>& a, const std::pair<string, int>& b){
     return a.first == b.first && a.second == b.second;
 }
-void printMsgOrigin(std::shared_ptr<networkMessage> msg){
-    cout<<"message origin: "<<msg->data<<endl;
-}
 
 std::set<std::pair<std::string, int>> hosts;
 std::unordered_map<std::pair<string, int>, std::shared_ptr<RemoteConnection>, pairhash> connections;
 
 void leaderChanged(const std::pair<std::string, int>& remote){
+    BOOST_LOG_SEV(Logger::getLogger(), info)<<"Main: leader changed"<<std::endl;
     lockManager::leaderChanged(remote);
     if(election::isLeader) {
         VisitorAccessManager::init_leader(5);
     }
 }
 void parse_cli(int argc, char* argv[]){
-    if(argc!=3){
-        std::cout << "Usage: " << argv[0] << "<networkGraphFile> <visitorDatabasePath>" << std::endl;
+    if(argc!=4){
+        std::cout << "Usage: " << argv[0] << "<networkGraphFile> <visitorDatabasePath> <SyslogServer>" << std::endl;
         std::terminate();
     }
     DATABASE_PATH=std::string(argv[2]);
     NETWORKGRAPH_PATH=std::string(argv[1]);
+    LOG_SRV=std::string(argv[3]);
 }
 int main(int argc, char* argv[])
 {
@@ -64,25 +64,22 @@ int main(int argc, char* argv[])
 
     parse_cli(argc, argv);
 
-    init_builtin_syslog();
-    src::severity_logger< severity_levels > lg(keywords::severity = normal);
-    BOOST_LOG_SEV(lg, normal) << "Application started";
+    Logger::setup(LOG_SRV);
 
     VisitorAccessManager::setup(DATABASE_PATH);
 
     readGraph(NETWORKGRAPH_PATH);
     hosts = getNeighbourHosts();
-    cout<<"adjacent hosts:"<<endl;
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"Main: adjacent hosts: "<<std::endl;
     for(std::pair<string, int> host : hosts){
-        cout<<"\t"<<host.first << ":" << host.second<<endl;
+        BOOST_LOG_SEV(Logger::getLogger(), debug)<<host.first << ":" << host.second<<std::endl;
     }
     boost::asio::io_service ios;
     lockManager::setup(ios);
     RemoteConnection::setup(&ios, getHost().second);
 
     for(std::pair<string, int> host : hosts) {
-        BOOST_LOG_SEV(lg, normal) << "Starting connection to adjacent node: " << host.first <<":"<<host.second;
-        cout<<"connecting to host: "<<host.first<<":"<<host.second<<endl;
+        BOOST_LOG_SEV(Logger::getLogger(), info)<<"Main: Starting connection to adjacent node: " << host.first <<":"<<host.second<<std::endl;
         auto con = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
         con->registerCallback(&election::handleElection, MessageType_t::ELECTION);
         con->registerCallback(&election::handleAck, MessageType_t::ACK);
@@ -92,55 +89,29 @@ int main(int argc, char* argv[])
     }
     {
         auto host = getHost();
-        BOOST_LOG_SEV(lg, normal) << "Starting connection to local node: " << host.first <<":"<<host.second;
-        cout<<"connecting to host: "<<host.first<<":"<<host.second<<endl;
+        BOOST_LOG_SEV(Logger::getLogger(), info)<< "Main: Starting connection to local node: " << host.first <<":"<<host.second<<std::endl;
         auto con = std::make_shared<RemoteConnection>(&ios, host.first, host.second);
         con->registerTimeoutCallback([](const std::pair<std::string, int>& remote){cerr<<"loopback connection timed out"<<endl;});
         connections[host] = con;
     }
-    election::setLeaderChange(leaderChanged);
 
+    election::setLeaderChange(leaderChanged);
 
     std::thread r([&] { ios.run(); });
 
 
     usleep(1000000ul * HEARTBEAT_TIMEOUT);
     while(!(bool)election::election_leader) {
-        if (!election::election_leader) { //join network; if no leader broadcast was received in the last 2*TIMEOUT interval start election
+        if (!election::election_leader) { //join network; if no leader broadcast was received in the last TIMEOUT interval start election
             election::startElection();
             usleep(1000000ul);
         }
-
-        cout << "has leader: " << (bool) election::election_leader << endl;
+        BOOST_LOG_SEV(Logger::getLogger(), debug)<< "Main: has leader: " << (bool) election::election_leader <<std::endl;
     }
-    if(argc == 2){
-        election::startElection();
-    }
-    //lockManager::leaderChanged(*election::election_leader);
     usleep(250);
 
     handleClient();
-
-    char inp = ' ';
-    std::cout<<"Select action: "<<endl<<"c: crash node" << endl << "q: quit node" <<endl<< "l: acquire lock and unlock immediately" <<endl;
-    while(inp != 'c'){
-        if(std::cin >> inp) {
-            if (inp == 'q') {
-                break;
-            }
-            switch (inp) {
-                case 'l':
-                    lockManager::getLock([]() { std::cout << ">>>>>>>>>>>>>got lock<<<<<<<<<<" << std::endl; });
-                    lockManager::getLock(lockManager::unlock);
-                    break;
-                default:
-                    break;
-            }
-            std::cout<<"Select action: "<<endl<<"c: crash node" << endl << "q: quit node" <<endl<< "l: acquire lock and unlock immediately" <<endl;
-        }else{
-            usleep(1000000ul*20);
-        }
-    }
+    std::terminate();
     r.join();
     return 0;
 }

@@ -7,3 +7,6 @@
 [submodule "tools/pssh"]
 	path = tools/pssh
 	url = https://github.com/lilydjwg/pssh
+[submodule "tools/syslog-server"]
+	path = tools/syslog-server
+	url = https://github.com/kwart/simple-syslog-server

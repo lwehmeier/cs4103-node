@@ -3,19 +3,20 @@
 //
 #include "main.h"
 #include "visitorAccessMgr.h"
-
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
-
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <SQLiteCpp/VariadicBind.h>
+#include "logging.h"
 
 void VisitorAccessManager::setup(std::string db_path) {
+    BOOST_LOG_SEV(Logger::getLogger(), info)<<"Initialising visitor database connector for database: " << db_path  <<std::endl;
     database_path = db_path;
 }
 bool VisitorAccessManager::init_leader(int permittedVisitors){
+    BOOST_LOG_SEV(Logger::getLogger(), debug)<<"Checking and preparing database after leader change: " << database_path <<std::endl;
     SQLite::Database db(database_path, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE);
     db.exec("DROP TABLE IF EXISTS cfg");
     db.exec("CREATE TABLE cfg (id INTEGER PRIMARY KEY, value INTEGER)");
@@ -42,7 +43,7 @@ bool VisitorAccessManager::add_visitor (long ticket)
     }
     catch (std::exception& e)
     {
-        std::cout << "SQLite exception: " << e.what() << std::endl;
+        BOOST_LOG_SEV(Logger::getLogger(), error)<<"SQLite exception: " << e.what()  <<std::endl;
         return false;
     }
 }
@@ -57,7 +58,7 @@ bool VisitorAccessManager::remove_visitor (int ticket)
     }
     catch (std::exception& e)
     {
-        std::cout << "SQLite exception: " << e.what() << std::endl;
+        BOOST_LOG_SEV(Logger::getLogger(), error)<<"SQLite exception: " << e.what()  <<std::endl;
         return false;
     }
 }
@@ -73,7 +74,7 @@ std::string VisitorAccessManager::getCurrentVisitors() {
     }
     catch (std::exception& e)
     {
-        std::cout << "SQLite exception: " << e.what() << std::endl;
+        BOOST_LOG_SEV(Logger::getLogger(), error)<<"SQLite exception: " << e.what()  <<std::endl;
         return "INTERNAL DATABASE ERROR\r\n";
     }
     return s+"\r\r";

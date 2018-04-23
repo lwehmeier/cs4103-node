@@ -21,6 +21,7 @@
 #include <set>
 #include <functional>
 #include "networkMessage.h"
+#include "logging.h"
 
 #define HEARTBEAT_INTERVAL 2ul
 #define HEARTBEAT_TIMEOUT (2.5*HEARTBEAT_INTERVAL)
@@ -42,9 +43,6 @@ public:
         boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), target_ip, std::to_string(target_port));
         boost::asio::ip::udp::resolver::iterator iter = resolver.resolve(query);
         remote_endpoint = *iter;
-        // The non_empty_output_queue_ deadline_timer is set to pos_infin whenever
-        // the output queue is empty. This ensures that the output actor stays
-        // asleep until a message is put into the queue.
         queue_notification.expires_at(boost::posix_time::pos_infin);
         queue_notification.async_wait(boost::bind(&Sender::queueEvent, this));
         socket.open(boost::asio::ip::udp::v4());
@@ -81,30 +79,22 @@ public:
            queue_notification(*ios), socket(rx_sock), remoteName(remote_ip), remoteHost(remote_ip, remote_port) {
         deadline_.expires_at(boost::posix_time::pos_infin);
         check_deadline();//init callbacks
-        //socket.open(boost::asio::ip::udp::v4());
         boost::asio::ip::udp::resolver resolver(*io_service);
         boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), remote_ip, std::to_string(remote_port));
         boost::asio::ip::udp::resolver::iterator iter = resolver.resolve(query);
         remote_endpoint=*iter;
-        //socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), remote_port));
-        // The non_empty_output_queue_ deadline_timer is set to pos_infin whenever
-        // the output queue is empty. This ensures that the output actor stays
-        // asleep until a message is put into the queue.
         queue_notification.expires_at(boost::posix_time::pos_infin);
         queue_notification.async_wait(boost::bind(&Client::queueEvent, this));
     }
     ~Client(){
-        std::cout<<"Client connection to "<<remoteHost.first<<":"<<remoteHost.second<<"killed"<<std::endl;
         boost::system::error_code ignored_ec;
-        //if(socket.is_open()) {
-        //    socket.cancel(ignored_ec);
-        //}
         queue_notification.cancel();
         deadline_.cancel();
     }
     int queuedMessages(){
         return queue.size();
     }
+    void expire_deadline();
     std::shared_ptr<networkMessage> getMessage(){
         auto msg = queue.front();
         queue.pop_front();
@@ -131,10 +121,9 @@ public:
     }
 };
 
-
-
-
+class election;
 class RemoteConnection{
+    friend class election;
     boost::array<char, MSG_SZ> rx_buffer;
     boost::asio::ip::udp::endpoint rx_endpoint;
     Sender sender;
@@ -161,7 +150,7 @@ public:
     }
     RemoteConnection(std::string ip, int port):RemoteConnection(io_service, ip, port){}
     ~RemoteConnection(){
-        std::cout<<"Client connection to "<<client->remoteHost.first<<":"<<client->remoteHost.second<<"killed"<<std::endl;
+        BOOST_LOG_SEV(Logger::getLogger(), debug)<< "Connections: Client connection to "<<client->remoteHost.first<<":"<<client->remoteHost.second<<"killed"<<std::endl;
         endpointMap.erase(std::pair<boost::asio::ip::udp::endpoint, std::shared_ptr<Client>>(client->getEndpoint(), client));
         nextHeartbeat.cancel();
     }

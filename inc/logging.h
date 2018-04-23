@@ -24,9 +24,28 @@ namespace keywords = boost::log::keywords;
 
 enum severity_levels
 {
-    normal,
+    trace,
+    debug,
+    info,
     warning,
     error
 };
-void init_builtin_syslog();
+void init_builtin_syslog(std::string syslogSrv);
+
+class Logger{
+public:
+    static src::severity_logger< severity_levels >& getLogger(){
+        return instance.boost_lg;
+    }
+    static void setup(std::string syslogSrv){
+        init_builtin_syslog(syslogSrv);
+    }
+private:
+    static Logger instance;
+    src::severity_logger< severity_levels > boost_lg;
+    Logger(){
+        boost_lg = src::severity_logger< severity_levels >(keywords::severity = info);
+        BOOST_LOG_SEV(boost_lg, info) << "Logging: Log Service started" << std::endl;
+    };
+};
 #endif //CS4103_LOGGING_H

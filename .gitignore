@@ -4,3 +4,5 @@ generatedNetwork.dot
 psshFile
 *.sh
 *.png
+tools/python-venv/
+*.db3
