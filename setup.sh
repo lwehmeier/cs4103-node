@@ -16,6 +16,7 @@ mkdir -p tools/python-venv
 python3 -m venv tools/python-venv
 source tools/python-venv/bin/activate
 cd tools/pssh
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig/
 python setup.py build
 python setup.py install
 pip install pycairo

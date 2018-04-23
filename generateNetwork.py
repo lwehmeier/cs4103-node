@@ -26,7 +26,10 @@ def mkFFGraph(hosts):
         i+=1
     g = Graph.Forest_Fire(i, 0.5, 0)
     layout = g.layout("kk")
-    plot(g, layout = layout)
+    try:
+        plot(g, layout = layout)
+    except:
+        print("Could not display network. Make sure pycairo is installed!")
     adjList = g.get_adjlist(mode=ALL)
     connections = {}
     for v in range(len(adjList)):

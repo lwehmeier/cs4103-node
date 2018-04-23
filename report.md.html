@@ -637,10 +637,12 @@ All required modules will automatically installed into a python3 virtual environ
 <li>gcc</li>
 <li>python3</li>
 <li>netcat</li>
+<li>standard libs in dev version that should be available on every system: zlib, cairo, libxml2, libX11</li>
 </ul>
 <h3 id="usage">Usage</h3>
 <p><em>Note:</em> The project folder must be on a drive shared by all machines.</p>
 <p>Initial setup: <code>bash setup.sh</code></p>
+<p>Source python venv: <code>source tools/python-venv/bin/activate</code></p>
 <p>Generate randomized network: <code>python3 generateNetwork.py host1 host2 host3 ... hostn</code></p>
 <p>Example: <code>python generateNetwork.py pc5-002-l pc5-001-l pc5-003-l pc5-004-l pc5-007-l pc5-008-l pc5-009-l pc5-011-l pc5-020-l pc5-021-l pc5-027-l pc5-029-l</code></p>
 <p>Build nodes on all machines in the network: <code>bash build.sh</code></p>

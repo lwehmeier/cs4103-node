@@ -189,11 +189,14 @@ Required build environment:
 * gcc
 * python3
 * netcat
+* standard libs in dev version that should be available on every system: zlib, cairo, libxml2, libX11
 
 ### Usage
 _Note:_ The project folder must be on a drive shared by all machines.
 
 Initial setup: `bash setup.sh`
+
+Source python venv: `source tools/python-venv/bin/activate`
 
 Generate randomized network: `python3 generateNetwork.py host1 host2 host3 ... hostn`
 
