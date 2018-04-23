@@ -4,3 +4,6 @@
 [submodule "SQLiteCpp"]
 	path = SQLiteCpp
 	url = https://github.com/SRombauts/SQLiteCpp
+[submodule "tools/pssh"]
+	path = tools/pssh
+	url = https://github.com/lilydjwg/pssh
