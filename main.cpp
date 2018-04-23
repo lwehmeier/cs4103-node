@@ -21,6 +21,8 @@
 #include "lockManager.h"
 #include "visitorAccessMgr.h"
 #include "clientHandler.h"
+std::string DATABASE_PATH;
+std::string NETWORKGRAPH_PATH;
 
 void handler(int sig) {
     void *array[10];
@@ -47,21 +49,35 @@ void leaderChanged(const std::pair<std::string, int>& remote){
         VisitorAccessManager::init_leader(5);
     }
 }
-
+void parse_cli(int argc, char* argv[]){
+    if(argc!=3){
+        std::cout << "Usage: " << argv[0] << "<networkGraphFile> <visitorDatabasePath>" << std::endl;
+        std::terminate();
+    }
+    DATABASE_PATH=std::string(argv[2]);
+    NETWORKGRAPH_PATH=std::string(argv[1]);
+}
 int main(int argc, char* argv[])
 {
+    signal(SIGSEGV, handler);   // install our handler
+    //signal(SIGABRT, handler);   // install our handler
+
+    parse_cli(argc, argv);
+
     init_builtin_syslog();
     src::severity_logger< severity_levels > lg(keywords::severity = normal);
     BOOST_LOG_SEV(lg, normal) << "Application started";
-    signal(SIGSEGV, handler);   // install our handler
-    //signal(SIGABRT, handler);   // install our handler
-    readGraph();
+
+    VisitorAccessManager::setup(DATABASE_PATH);
+
+    readGraph(NETWORKGRAPH_PATH);
     hosts = getNeighbourHosts();
     cout<<"adjacent hosts:"<<endl;
     for(std::pair<string, int> host : hosts){
         cout<<"\t"<<host.first << ":" << host.second<<endl;
     }
     boost::asio::io_service ios;
+    lockManager::setup(ios);
     RemoteConnection::setup(&ios, getHost().second);
 
     for(std::pair<string, int> host : hosts) {

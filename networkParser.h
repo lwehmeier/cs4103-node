@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include <set>
-void readGraph();
+void readGraph(std::string path);
 std::string getIdentity();
 std::set<std::pair<std::string, int>> getNeighbourHosts();
 std::pair<std::string, int> getHost();

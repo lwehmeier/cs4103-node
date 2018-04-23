@@ -12,6 +12,9 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <SQLiteCpp/VariadicBind.h>
 
+void VisitorAccessManager::setup(std::string db_path) {
+    database_path = db_path;
+}
 bool VisitorAccessManager::init_leader(int permittedVisitors){
     SQLite::Database db(database_path, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE);
     db.exec("DROP TABLE IF EXISTS cfg");

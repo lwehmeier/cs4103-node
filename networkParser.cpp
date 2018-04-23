@@ -32,7 +32,7 @@ typedef property < graph_name_t, std::string > graph_p;
 typedef adjacency_list < vecS, vecS, directedS,
         DotVertex, edge_p, graph_p > graph_t;
 graph_t networkGraph(0);
-void readGraph(){
+void readGraph(std::string path){
 
     // Construct an empty graph and prepare the dynamic_property_maps.
     dynamic_properties dp;
@@ -52,7 +52,7 @@ void readGraph(){
             gname(get_property(networkGraph,graph_name));
     dp.property("name",gname);
 
-    std::ifstream dot(std::string("/cs/home/lw96/CLionProjects/cs4103/generatedNetwork.dot"));
+    std::ifstream dot(path);
     bool status = read_graphviz(dot,networkGraph,dp,"node_id");
 
     long i = *(networkGraph.vertex_set().begin());

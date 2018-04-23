@@ -6,6 +6,8 @@
 #define CS4103_VISITORACCESSMGR_H
 #include <string>
 struct VisitorAccessManager {
+    static void setup(std::string database_path);
+
     static bool init_leader(int permittedVisitors);
 
     static bool add_visitor(long ticket);

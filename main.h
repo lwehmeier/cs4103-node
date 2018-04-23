@@ -37,7 +37,8 @@ public:
 
 extern std::set<std::pair<std::string, int>> hosts;
 extern std::unordered_map<std::pair<string, int>, std::shared_ptr<RemoteConnection>, pairhash> connections;
-
+extern std::string DATABASE_PATH;
+extern std::string NETWORKGRAPH_PATH;
 //utils
 bool node_equals(const std::pair<string, int>& a, const std::pair<string, int>& b);
 void printMsgOrigin(std::shared_ptr<networkMessage> msg);

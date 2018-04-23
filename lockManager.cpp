@@ -72,11 +72,18 @@ void lockManager::grantLock(const std::pair<std::string, int>& remote){
     auto msg = std::make_shared<networkMessage>();
     msg->type= static_cast<int>(MessageType_t::GRANT);
     connections[currentLockHolder]->sendMessage(msg);
+    lock_timeout->cancel();
+    lock_timeout->expires_from_now(boost::posix_time::seconds(LOCK_DURATION_S));
+    lock_timeout->async_wait(boost::bind(&lockManager::expire_lock));
+}
+void lockManager::expire_lock(){
+    if (lock_timeout->expires_at() <= boost::asio::deadline_timer::traits_type::now()) {//if expired
+        handleUnlock(nullptr, currentLockHolder);
+    }
 }
 void lockManager::handleLock(std::shared_ptr<networkMessage> rxMessage, const std::pair<std::string, int>& remote){
     std::cerr<<"received lock req from node "<<remote.first<<":"<<remote.second<<std::endl;
     if(currentLockHolder.second==0){
-        std::cerr<<"immed. granting req "<<std::endl;
         grantLock(remote);
         return;
     }
@@ -101,8 +108,12 @@ void lockManager::handleUnlock(std::shared_ptr<networkMessage> rxMessage, const 
         lockRequests.erase(iter);
     }
 }
+void lockManager::setup(boost::asio::io_service &ios) {
+    lock_timeout = new boost::asio::deadline_timer(ios);
+}
 
 std::vector<lockManager_callback_t> lockManager::lockCallbacks;
 std::pair<std::string, int> lockManager::currentLeader;
 std::vector<std::pair<std::string, int>> lockManager::lockRequests;
 std::pair<std::string, int> lockManager::currentLockHolder;
+boost::asio::deadline_timer* lockManager::lock_timeout;
