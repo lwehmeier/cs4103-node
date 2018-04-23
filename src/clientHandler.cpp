@@ -20,6 +20,7 @@
 #include <functional>
 #include "visitorAccessMgr.h"
 #include "lockManager.h"
+#include "election.h"
 
 using boost::asio::ip::udp;
 using boost::asio::ip::address;
@@ -35,7 +36,7 @@ void handleClient(){
         boost::system::error_code error;
         socket.receive_from(boost::asio::buffer(recv_buf),
                             remote_endpoint, 0, error);
-        std::string message = "Select action:\r\nc: crash node\r\nq: quit node\r\ne <ticketID>: new entry\r\nl <ticketID>: leaving visitor\r\nv: print current visitors\r\n";
+        std::string message = "Select action:\r\nc: crash node\r\nq: quit node\r\nE: start election\r\ne <ticketID>: new entry\r\nl <ticketID>: leaving visitor\r\nv: print current visitors\r\n";
         boost::system::error_code ignored_error;
         socket.send_to(boost::asio::buffer(message),
                        remote_endpoint, 0, ignored_error);
@@ -46,6 +47,9 @@ void handleClient(){
             case 'c':
             case 'q':
                 return;
+            case 'E':
+                election::startElection();
+                break;
             case 'e':
                 ticket = atoi(recv_buf.data()+2);
                 lockManager::getLock(std::bind([&success, &opFinished](int ticketID){
